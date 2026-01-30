@@ -35,7 +35,7 @@ export class OpenAIProvider implements LLMProvider {
       });
 
       const toolCall = response.choices[0]?.message?.tool_calls?.[0];
-      const content = toolCall?.function?.arguments || '';
+      const content = toolCall && 'function' in toolCall ? toolCall.function.arguments : '';
 
       return {
         content,

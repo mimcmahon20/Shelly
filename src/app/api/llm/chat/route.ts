@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AnthropicProvider } from '@/lib/llm/anthropic';
+import { getProvider } from '@/lib/llm/registry';
 import type { LLMRequest } from '@/lib/types';
-
-const provider = new AnthropicProvider();
 
 export async function POST(req: NextRequest) {
   const apiKey = req.headers.get('X-API-Key');
@@ -17,6 +15,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const provider = getProvider(body.provider);
     const result = await provider.chat(body, apiKey);
     return NextResponse.json(result);
   } catch (error) {

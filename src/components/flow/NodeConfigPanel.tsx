@@ -7,7 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { X, Plus, Trash2 } from 'lucide-react';
-import type { RoutingRule } from '@/lib/types';
+import type { RoutingRule, ProviderName } from '@/lib/types';
+import { PROVIDERS } from '@/lib/llm/providers';
 
 export function NodeConfigPanel() {
   const selectedNodeId = useFlowStore((s) => s.selectedNodeId);
@@ -67,6 +68,42 @@ export function NodeConfigPanel() {
         {(node.type === 'agent' || node.type === 'structured-output') && (
           <>
             <Separator />
+            <div>
+              <Label>Provider</Label>
+              <Select
+                value={node.data.provider || 'anthropic'}
+                onValueChange={(v) => {
+                  const newProvider = v as ProviderName;
+                  const models = PROVIDERS[newProvider]?.models || [];
+                  updateNode(node.id, { provider: newProvider, model: models[0] || '' });
+                }}
+              >
+                <SelectTrigger className="text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(PROVIDERS).map(([key, { label }]) => (
+                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Model</Label>
+              <Select
+                value={node.data.model || PROVIDERS[node.data.provider || 'anthropic']?.models[0] || ''}
+                onValueChange={(v) => updateNode(node.id, { model: v })}
+              >
+                <SelectTrigger className="text-xs font-mono">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(PROVIDERS[node.data.provider || 'anthropic']?.models || []).map((m) => (
+                    <SelectItem key={m} value={m}>{m}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div>
               <Label>System Prompt</Label>
               <Textarea

@@ -102,6 +102,8 @@ async function executeNode(
         const systemPrompt = node.data.systemPrompt || 'You are a helpful assistant.';
 
         const llmResult = await callLLM({
+          provider: node.data.provider,
+          model: node.data.model,
           systemPrompt,
           humanMessage,
         });
@@ -125,6 +127,8 @@ async function executeNode(
         const systemPrompt = node.data.systemPrompt || 'You are a helpful assistant. Return structured data.';
 
         const llmResult = await callLLM({
+          provider: node.data.provider,
+          model: node.data.model,
           systemPrompt,
           humanMessage,
           outputSchema: node.data.outputSchema,

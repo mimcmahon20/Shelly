@@ -38,6 +38,7 @@ const defaultLabels: Record<FlowNode['type'], string> = {
   'structured-output': 'Structured Output',
   'router': 'Router',
   'output': 'Output',
+  'html-renderer': 'HTML Renderer',
 };
 
 export const useFlowStore = create<FlowState>((set, get) => ({

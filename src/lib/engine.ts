@@ -1,5 +1,5 @@
 import type { Flow, FlowNode, NodeResult, RoutingRule } from './types';
-import { callLLM } from './llm/provider';
+import { callLLMStream } from './llm/provider';
 
 type ResultMap = Map<string, NodeResult>;
 
@@ -30,10 +30,22 @@ function getIncomingData(flow: Flow, nodeId: string, results: ResultMap): unknow
 
 function interpolateTemplate(template: string, data: unknown): string {
   if (!template) return typeof data === 'string' ? data : JSON.stringify(data);
-  return template.replace(/\{\{(\w+)\}\}/g, (_, key) => {
-    if (typeof data === 'object' && data !== null && key in data) {
-      const val = (data as Record<string, unknown>)[key];
-      return typeof val === 'string' ? val : JSON.stringify(val);
+  return template.replace(/\{\{([\w.|-]+)\}\}/g, (_, key: string) => {
+    // Support dot notation for nested access (e.g. {{result.field}})
+    if (typeof data === 'object' && data !== null) {
+      const parts = key.split('.');
+      let current: unknown = data;
+      for (const part of parts) {
+        if (typeof current === 'object' && current !== null && part in current) {
+          current = (current as Record<string, unknown>)[part];
+        } else {
+          current = undefined;
+          break;
+        }
+      }
+      if (current !== undefined) {
+        return typeof current === 'string' ? current : JSON.stringify(current);
+      }
     }
     if (key === 'input') return typeof data === 'string' ? data : JSON.stringify(data);
     return `{{${key}}}`;
@@ -101,7 +113,7 @@ async function executeNode(
         const humanMessage = interpolateTemplate(node.data.humanMessageTemplate || '', input);
         const systemPrompt = node.data.systemPrompt || 'You are a helpful assistant.';
 
-        const llmResult = await callLLM({
+        const llmResult = await callLLMStream({
           provider: node.data.provider,
           model: node.data.model,
           systemPrompt,
@@ -126,7 +138,7 @@ async function executeNode(
         const humanMessage = interpolateTemplate(node.data.humanMessageTemplate || '', input);
         const systemPrompt = node.data.systemPrompt || 'You are a helpful assistant. Return structured data.';
 
-        const llmResult = await callLLM({
+        const llmResult = await callLLMStream({
           provider: node.data.provider,
           model: node.data.model,
           systemPrompt,
@@ -194,6 +206,25 @@ async function executeNode(
         results.set(node.id, result);
         onResult(result);
         return targetNodeId;
+      }
+
+      case 'html-renderer': {
+        // Pass-through node: extract HTML from input and forward it
+        let htmlContent: unknown = input;
+        if (typeof input === 'object' && input !== null && 'html' in input) {
+          htmlContent = (input as Record<string, unknown>).html;
+        }
+        const htmlResult: NodeResult = {
+          nodeId: node.id,
+          nodeType: node.type,
+          input,
+          output: htmlContent,
+          latencyMs: Date.now() - start,
+        };
+        results.set(node.id, htmlResult);
+        onResult(htmlResult);
+        const nextHtml = getAdjacentNodes(flow, node.id);
+        return nextHtml[0] ?? null;
       }
 
       case 'output': {

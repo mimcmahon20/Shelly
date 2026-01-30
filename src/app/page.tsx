@@ -15,7 +15,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 import { executeFlow } from '@/lib/engine';
-import { Play, Plus, Settings, FolderOpen, Trash2, Download, Upload } from 'lucide-react';
+import { Play, Plus, Settings, FolderOpen, Trash2, Download, Upload, RotateCcw } from 'lucide-react';
+import { resetDatabase } from '@/lib/db';
 
 export default function Home() {
   const {
@@ -190,8 +191,28 @@ export default function Home() {
               <SheetHeader>
                 <SheetTitle>Settings</SheetTitle>
               </SheetHeader>
-              <div className="mt-4">
+              <div className="mt-4 space-y-6">
                 <ApiKeyInput />
+                <Separator />
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Reset</h4>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Delete all flows and runs, then restore the example flow.
+                  </p>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="w-full"
+                    onClick={async () => {
+                      if (!confirm('This will delete all flows and run history. Continue?')) return;
+                      await resetDatabase();
+                      await loadFlows();
+                      setCurrentFlow('example-designer-builder');
+                    }}
+                  >
+                    <RotateCcw className="h-3 w-3 mr-1" /> Reset to Example
+                  </Button>
+                </div>
               </div>
             </SheetContent>
           </Sheet>

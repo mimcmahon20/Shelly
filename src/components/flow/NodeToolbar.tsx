@@ -1,5 +1,5 @@
 'use client';
-import { MessageSquare, Bot, Braces, GitBranch, FileOutput } from 'lucide-react';
+import { MessageSquare, Bot, Braces, GitBranch, FileOutput, Globe } from 'lucide-react';
 import type { NodeType } from '@/lib/types';
 
 const nodeTypeItems: { type: NodeType; label: string; icon: React.ReactNode; color: string }[] = [
@@ -8,6 +8,7 @@ const nodeTypeItems: { type: NodeType; label: string; icon: React.ReactNode; col
   { type: 'structured-output', label: 'Structured', icon: <Braces className="h-4 w-4" />, color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
   { type: 'router', label: 'Router', icon: <GitBranch className="h-4 w-4" />, color: 'bg-amber-100 text-amber-700 border-amber-200' },
   { type: 'output', label: 'Output', icon: <FileOutput className="h-4 w-4" />, color: 'bg-rose-100 text-rose-700 border-rose-200' },
+  { type: 'html-renderer', label: 'HTML', icon: <Globe className="h-4 w-4" />, color: 'bg-cyan-100 text-cyan-700 border-cyan-200' },
 ];
 
 export function NodeToolbar() {

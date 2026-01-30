@@ -77,3 +77,10 @@ export async function deleteRun(id: string) {
   const db = await getDB();
   await db.delete('runs', id);
 }
+
+export async function resetDatabase() {
+  const db = await getDB();
+  await db.clear('flows');
+  await db.clear('runs');
+  await db.put('flows', EXAMPLE_FLOW);
+}

@@ -1,4 +1,4 @@
-export type NodeType = 'user-input' | 'agent' | 'structured-output' | 'router' | 'output';
+export type NodeType = 'user-input' | 'agent' | 'structured-output' | 'router' | 'output' | 'html-renderer';
 
 export interface RoutingRule {
   field: string;

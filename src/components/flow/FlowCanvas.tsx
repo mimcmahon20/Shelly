@@ -18,6 +18,7 @@ import { AgentNode } from './nodes/AgentNode';
 import { StructuredOutputNode } from './nodes/StructuredOutputNode';
 import { RouterNode } from './nodes/RouterNode';
 import { OutputNode } from './nodes/OutputNode';
+import { HtmlRendererNode } from './nodes/HtmlRendererNode';
 import type { FlowNode, FlowEdge, NodeType } from '@/lib/types';
 
 const nodeTypes = {
@@ -26,6 +27,7 @@ const nodeTypes = {
   'structured-output': StructuredOutputNode,
   'router': RouterNode,
   'output': OutputNode,
+  'html-renderer': HtmlRendererNode,
 };
 
 function toRFNodes(nodes: FlowNode[]): Node[] {
@@ -176,6 +178,7 @@ export function FlowCanvas() {
         'structured-output': 'Structured Output',
         'router': 'Router',
         'output': 'Output',
+        'html-renderer': 'HTML Renderer',
       };
 
       const newNode: Node = {

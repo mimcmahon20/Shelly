@@ -11,7 +11,8 @@
       "Bash(npx next build:*)",
       "WebSearch",
       "WebFetch(domain:platform.openai.com)",
-      "WebFetch(domain:ai.google.dev)"
+      "WebFetch(domain:ai.google.dev)",
+      "Bash(npm run lint:*)"
     ]
   }
 }

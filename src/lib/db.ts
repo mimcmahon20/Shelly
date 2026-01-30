@@ -1,5 +1,6 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import type { Flow, Run } from './types';
+import { EXAMPLE_FLOW } from './exampleFlow';
 
 interface ShellyDB extends DBSchema {
   flows: {
@@ -26,6 +27,9 @@ function getDB() {
         const runStore = db.createObjectStore('runs', { keyPath: 'id' });
         runStore.createIndex('by-flow', 'flowId');
         runStore.createIndex('by-started', 'startedAt');
+
+        // Seed the example flow
+        flowStore.put(EXAMPLE_FLOW);
       },
     });
   }

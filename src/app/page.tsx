@@ -14,8 +14,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Settings, Trash2, Download, Upload, RotateCcw, X } from 'lucide-react';
+import { Plus, Settings, Trash2, Download, Upload, RotateCcw, X, HelpCircle } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { HowToModal } from '@/components/HowToModal';
 import { resetDatabase } from '@/lib/db';
 
 export default function Home() {
@@ -31,6 +32,7 @@ export default function Home() {
 
   const [newFlowName, setNewFlowName] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [howToOpen, setHowToOpen] = useState(false);
 
   useEffect(() => {
     loadFlows();
@@ -146,6 +148,9 @@ export default function Home() {
               </Button>
             </>
           )}
+          <Button variant="outline" size="sm" onClick={() => setHowToOpen(true)}>
+            <HelpCircle className="h-3 w-3" />
+          </Button>
           <ThemeToggle />
           <Sheet>
             <SheetTrigger asChild>
@@ -207,6 +212,7 @@ export default function Home() {
           <ResultsTab />
         </TabsContent>
       </Tabs>
+      <HowToModal open={howToOpen} onOpenChange={setHowToOpen} />
     </div>
   );
 }

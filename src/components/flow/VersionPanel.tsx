@@ -4,7 +4,7 @@ import { useVersionStore } from '@/stores/versionStore';
 import { useFlowStore } from '@/stores/flowStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Save, RotateCcw, Trash2, GitBranch } from 'lucide-react';
+import { Save, RotateCcw, Trash2 } from 'lucide-react';
 
 export function VersionPanel() {
   const { versions, createVersion, deleteVersion, restoreVersion } = useVersionStore();
@@ -28,9 +28,6 @@ export function VersionPanel() {
 
   return (
     <div className="flex flex-col gap-2 p-3">
-      <h4 className="text-sm font-medium flex items-center gap-1.5">
-        <GitBranch className="h-3.5 w-3.5" /> Versions
-      </h4>
       <div className="flex gap-1.5">
         <Input
           value={label}

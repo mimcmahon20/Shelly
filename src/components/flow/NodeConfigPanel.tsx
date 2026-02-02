@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { X, Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import type { RoutingRule, ProviderName } from '@/lib/types';
 import { PROVIDERS } from '@/lib/llm/providers';
 
@@ -47,14 +47,7 @@ export function NodeConfigPanel() {
   const availableTargets = flow?.nodes.filter((n) => n.id !== node.id) || [];
 
   return (
-    <div className="w-80 border-l bg-card p-4 overflow-y-auto">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-sm">Configure Node</h3>
-        <Button variant="ghost" size="icon" onClick={() => selectNode(null)}>
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-
+    <div className="p-4 overflow-y-auto">
       <div className="space-y-4">
         <div>
           <Label>Label</Label>

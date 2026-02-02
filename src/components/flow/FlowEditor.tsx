@@ -4,14 +4,12 @@ import { useFlowStore } from '@/stores/flowStore';
 import { useRunStore } from '@/stores/runStore';
 import { FlowCanvas } from '@/components/flow/FlowCanvas';
 import { NodeToolbar } from '@/components/flow/NodeToolbar';
-import { NodeConfigPanel } from '@/components/flow/NodeConfigPanel';
-import { RunHistory } from '@/components/runs/RunHistory';
-import { VersionPanel } from '@/components/flow/VersionPanel';
+import { SidebarTabs } from '@/components/flow/SidebarTabs';
 import { useVersionStore } from '@/stores/versionStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { executeFlow } from '@/lib/engine';
-import { Play, FolderOpen, Braces } from 'lucide-react';
+import { Play, Braces } from 'lucide-react';
 import type { Flow } from '@/lib/types';
 
 function extractTemplateVariables(flow: Flow): string[] {
@@ -32,7 +30,6 @@ function extractTemplateVariables(flow: Flow): string[] {
 export function FlowEditor() {
   const {
     currentFlowId,
-    selectedNodeId,
     persistCurrentFlow,
     getCurrentFlow,
     flows,
@@ -149,27 +146,7 @@ export function FlowEditor() {
         </div>
       </div>
 
-      {currentFlowId && (
-        <>
-          {selectedNodeId ? (
-            <NodeConfigPanel />
-          ) : (
-            <div className="w-80 border-l flex flex-col">
-              <div className="px-3 py-2 border-b">
-                <h3 className="text-sm font-medium flex items-center gap-1.5">
-                  <FolderOpen className="h-3.5 w-3.5" /> Run History
-                </h3>
-              </div>
-              <div className="flex-1 overflow-auto">
-                <RunHistory />
-                <div className="border-t">
-                  <VersionPanel />
-                </div>
-              </div>
-            </div>
-          )}
-        </>
-      )}
+      {currentFlowId && <SidebarTabs />}
     </div>
   );
 }

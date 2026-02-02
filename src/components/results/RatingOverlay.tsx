@@ -16,6 +16,7 @@ export function RatingOverlay() {
   const [notes, setNotes] = useState('');
   const [ratingId, setRatingId] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const dirtyRef = useRef(false);
 
   const currentRunId = ratingRunIds[ratingIndex];
   const currentRun = batchRuns.find((r) => r.id === currentRunId);
@@ -33,6 +34,7 @@ export function RatingOverlay() {
       setNotes('');
       setRatingId(null);
     }
+    dirtyRef.current = false;
   }, [currentRunId, ratings]);
 
   // Auto-save debounced
@@ -57,7 +59,7 @@ export function RatingOverlay() {
   }, [currentRunId, localRatings, notes, ratingId, saveRating]);
 
   useEffect(() => {
-    autoSave();
+    if (dirtyRef.current) autoSave();
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [localRatings, notes, autoSave]);
 
@@ -124,7 +126,7 @@ export function RatingOverlay() {
                     size="sm"
                     variant={localRatings[dim] === v ? 'default' : 'outline'}
                     className="w-full"
-                    onClick={() => setLocalRatings((prev) => ({ ...prev, [dim]: v }))}
+                    onClick={() => { dirtyRef.current = true; setLocalRatings((prev) => ({ ...prev, [dim]: v })); }}
                   >
                     {v}
                   </Button>
@@ -136,7 +138,7 @@ export function RatingOverlay() {
             <label className="text-xs font-medium">Notes</label>
             <Textarea
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={(e) => { dirtyRef.current = true; setNotes(e.target.value); }}
               placeholder="Optional notes..."
               rows={4}
               className="mt-1"

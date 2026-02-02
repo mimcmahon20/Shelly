@@ -113,6 +113,10 @@ export function BatchResults() {
         </div>
       ))}
 
+      {selectedBatch && Object.keys(groupedByFlow).length === 0 && (
+        <p className="text-xs text-muted-foreground text-center py-8">No completed runs in this batch.</p>
+      )}
+
       {previewHtml && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-8" onClick={() => setPreviewHtml(null)}>
           <div className="bg-background rounded-lg w-full max-w-4xl h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>

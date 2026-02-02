@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Settings, Trash2, Download, Upload, RotateCcw } from 'lucide-react';
+import { Plus, Settings, Trash2, Download, Upload, RotateCcw, X } from 'lucide-react';
 import { resetDatabase } from '@/lib/db';
 
 export default function Home() {
@@ -101,6 +101,11 @@ export default function Home() {
                   ))}
                 </SelectContent>
               </Select>
+              {currentFlowId && (
+                <Button variant="ghost" size="sm" onClick={() => setCurrentFlow(null)}>
+                  <X className="h-3 w-3" />
+                </Button>
+              )}
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
                   <Plus className="h-3 w-3 mr-1" /> New

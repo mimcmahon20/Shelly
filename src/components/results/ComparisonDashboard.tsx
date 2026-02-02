@@ -22,11 +22,13 @@ export function ComparisonDashboard() {
   useEffect(() => {
     if (selectedBatchIds.length > 0) {
       loadRatingsForBatches(selectedBatchIds);
-      const allRunIds = selectedBatches.flatMap((b) => b.runIds);
+      const allRunIds = batches
+        .filter((b) => selectedBatchIds.includes(b.id))
+        .flatMap((b) => b.runIds);
       loadBatchRuns(allRunIds);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedBatchIds.join(',')]);
+  }, [selectedBatchIds.join(','), batches, loadRatingsForBatches, loadBatchRuns]);
 
   const toggleBatch = (batchId: string) => {
     setSelectedBatchIds((prev) =>

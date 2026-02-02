@@ -114,3 +114,12 @@ export interface RunRating {
   notes?: string;
   createdAt: string;
 }
+
+export interface FlowVersion {
+  id: string;
+  flowId: string;
+  label: string;
+  nodes: FlowNode[];
+  edges: FlowEdge[];
+  createdAt: string;
+}

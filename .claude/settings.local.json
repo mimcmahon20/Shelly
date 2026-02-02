@@ -17,7 +17,8 @@
       "Bash(system_profiler:*)",
       "Bash(osascript:*)",
       "Bash(mdfind:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(grep:*)"
     ]
   }
 }

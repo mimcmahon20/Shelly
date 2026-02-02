@@ -6,6 +6,8 @@ import { FlowCanvas } from '@/components/flow/FlowCanvas';
 import { NodeToolbar } from '@/components/flow/NodeToolbar';
 import { NodeConfigPanel } from '@/components/flow/NodeConfigPanel';
 import { RunHistory } from '@/components/runs/RunHistory';
+import { VersionPanel } from '@/components/flow/VersionPanel';
+import { useVersionStore } from '@/stores/versionStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { executeFlow } from '@/lib/engine';
@@ -37,6 +39,7 @@ export function FlowEditor() {
   } = useFlowStore();
 
   const { loadRuns, createRun, addNodeResult, completeRun, failRun, persistRun } = useRunStore();
+  const { loadVersions } = useVersionStore();
 
   const [userInput, setUserInput] = useState('');
   const [structuredInput, setStructuredInput] = useState<Record<string, string>>({});
@@ -50,8 +53,9 @@ export function FlowEditor() {
   useEffect(() => {
     if (currentFlowId) {
       loadRuns(currentFlowId);
+      loadVersions(currentFlowId);
     }
-  }, [currentFlowId, loadRuns]);
+  }, [currentFlowId, loadRuns, loadVersions]);
 
   useEffect(() => {
     if (currentFlowId) {
@@ -156,8 +160,11 @@ export function FlowEditor() {
                   <FolderOpen className="h-3.5 w-3.5" /> Run History
                 </h3>
               </div>
-              <div className="flex-1 overflow-hidden">
+              <div className="flex-1 overflow-auto">
                 <RunHistory />
+                <div className="border-t">
+                  <VersionPanel />
+                </div>
               </div>
             </div>
           )}

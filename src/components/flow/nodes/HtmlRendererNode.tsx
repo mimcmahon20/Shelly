@@ -21,7 +21,7 @@ export function HtmlRendererNode({ id, data, selected }: NodeProps) {
   return (
     <>
       <div
-        className={`rounded-lg border-2 bg-cyan-50 px-4 py-3 shadow-sm min-w-[160px] cursor-pointer ${selected ? 'border-cyan-500' : 'border-cyan-200'}`}
+        className={`rounded-lg border-2 bg-cyan-50 dark:bg-cyan-950 px-4 py-3 shadow-sm min-w-[160px] cursor-pointer ${selected ? 'border-cyan-500' : 'border-cyan-200 dark:border-cyan-800'}`}
         onClick={(e) => {
           if (htmlContent) {
             e.stopPropagation();
@@ -31,11 +31,11 @@ export function HtmlRendererNode({ id, data, selected }: NodeProps) {
       >
         <Handle type="target" position={Position.Top} className="!bg-cyan-500 !w-3 !h-3" />
         <div className="flex items-center gap-2">
-          <Globe className="h-4 w-4 text-cyan-600" />
-          <span className="text-sm font-medium text-cyan-900">{data.label || 'HTML Renderer'}</span>
+          <Globe className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+          <span className="text-sm font-medium text-cyan-900 dark:text-cyan-100">{data.label || 'HTML Renderer'}</span>
         </div>
         {htmlContent && (
-          <p className="text-[10px] text-cyan-600 mt-1">Click to preview</p>
+          <p className="text-[10px] text-cyan-600 dark:text-cyan-400 mt-1">Click to preview</p>
         )}
         <Handle type="source" position={Position.Bottom} className="!bg-cyan-500 !w-3 !h-3" />
       </div>

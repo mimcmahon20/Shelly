@@ -15,6 +15,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Settings, Trash2, Download, Upload, RotateCcw, X } from 'lucide-react';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { resetDatabase } from '@/lib/db';
 
 export default function Home() {
@@ -145,6 +146,7 @@ export default function Home() {
               </Button>
             </>
           )}
+          <ThemeToggle />
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="outline" size="sm">

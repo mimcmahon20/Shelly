@@ -72,7 +72,7 @@ function SingleKeyInput({ config }: { config: ProviderKeyConfig }) {
           </Button>
         )}
       </div>
-      {saved && <p className="text-xs text-green-600">Saved</p>}
+      {saved && <p className="text-xs text-green-600 dark:text-green-400">Saved</p>}
     </div>
   );
 }

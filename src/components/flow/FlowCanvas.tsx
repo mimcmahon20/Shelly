@@ -48,7 +48,7 @@ function toRFEdges(edges: FlowEdge[]): Edge[] {
     targetHandle: e.targetHandle,
     label: e.label,
     animated: true,
-    style: { stroke: '#6366f1' },
+    style: { stroke: 'var(--edge-color, #6366f1)' },
   }));
 }
 
@@ -140,7 +140,7 @@ export function FlowCanvas() {
 
   const onConnect = useCallback(
     (connection: Connection) => {
-      setRFEdges((eds) => rfAddEdge({ ...connection, animated: true, style: { stroke: '#6366f1' } }, eds));
+      setRFEdges((eds) => rfAddEdge({ ...connection, animated: true, style: { stroke: 'var(--edge-color, #6366f1)' } }, eds));
     },
     [setRFEdges]
   );

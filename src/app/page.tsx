@@ -1,60 +1,39 @@
 'use client';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useFlowStore } from '@/stores/flowStore';
-import { useRunStore } from '@/stores/runStore';
-import { FlowCanvas } from '@/components/flow/FlowCanvas';
-import { NodeToolbar } from '@/components/flow/NodeToolbar';
-import { NodeConfigPanel } from '@/components/flow/NodeConfigPanel';
-import { RunHistory } from '@/components/runs/RunHistory';
+import { FlowEditor } from '@/components/flow/FlowEditor';
+import { TestTab } from '@/components/test/TestTab';
+import { ResultsTab } from '@/components/results/ResultsTab';
 
 import { ApiKeyInput } from '@/components/settings/ApiKeyInput';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
-import { executeFlow } from '@/lib/engine';
-import { Play, Plus, Settings, FolderOpen, Trash2, Download, Upload, RotateCcw } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, Settings, Trash2, Download, Upload, RotateCcw } from 'lucide-react';
 import { resetDatabase } from '@/lib/db';
 
 export default function Home() {
   const {
     flows,
     currentFlowId,
-    selectedNodeId,
     loadFlows,
     createFlow,
     setCurrentFlow,
     deleteFlow,
-    persistCurrentFlow,
     getCurrentFlow,
   } = useFlowStore();
 
-  const { loadRuns, createRun, addNodeResult, completeRun, failRun, persistRun } = useRunStore();
-
   const [newFlowName, setNewFlowName] = useState('');
-  const [userInput, setUserInput] = useState('');
-  const [isRunning, setIsRunning] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   useEffect(() => {
     loadFlows();
   }, [loadFlows]);
-
-  useEffect(() => {
-    if (currentFlowId) {
-      loadRuns(currentFlowId);
-    }
-  }, [currentFlowId, loadRuns]);
-
-  // Auto-save on changes
-  useEffect(() => {
-    if (currentFlowId) {
-      const timeout = setTimeout(() => persistCurrentFlow(), 500);
-      return () => clearTimeout(timeout);
-    }
-  }, [currentFlowId, flows, persistCurrentFlow]);
 
   const handleCreateFlow = async () => {
     if (!newFlowName.trim()) return;
@@ -62,26 +41,6 @@ export default function Home() {
     setNewFlowName('');
     setCreateDialogOpen(false);
   };
-
-  const handleRunFlow = useCallback(async () => {
-    const flow = getCurrentFlow();
-    if (!flow || !userInput.trim()) return;
-
-    setIsRunning(true);
-    const run = createRun(flow.id, userInput.trim());
-
-    try {
-      const { finalOutput } = await executeFlow(flow, userInput.trim(), (result) => {
-        addNodeResult(run.id, result);
-      });
-      completeRun(run.id, finalOutput);
-    } catch (error) {
-      failRun(run.id, error instanceof Error ? error.message : 'Unknown error');
-    } finally {
-      setIsRunning(false);
-      await persistRun(run.id);
-    }
-  }, [getCurrentFlow, userInput, createRun, addNodeResult, completeRun, failRun, persistRun]);
 
   const handleExportFlow = () => {
     const flow = getCurrentFlow();
@@ -130,18 +89,18 @@ export default function Home() {
           {/* Flow selector */}
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <div className="flex items-center gap-2">
-              <select
-                className="text-sm border rounded px-2 py-1 bg-background"
-                value={currentFlowId || ''}
-                onChange={(e) => setCurrentFlow(e.target.value || null)}
-              >
-                <option value="">Select a flow...</option>
-                {flows.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.name}
-                  </option>
-                ))}
-              </select>
+              <Select value={currentFlowId || ''} onValueChange={(v) => setCurrentFlow(v || null)}>
+                <SelectTrigger className="w-48 h-8 text-sm">
+                  <SelectValue placeholder="Select a flow..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {flows.map((f) => (
+                    <SelectItem key={f.id} value={f.id}>
+                      {f.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
                   <Plus className="h-3 w-3 mr-1" /> New
@@ -219,54 +178,28 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Main content */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Flow editor area */}
-        <div className="flex-1 flex flex-col">
-          {currentFlowId && <NodeToolbar />}
-
-          {/* Execute bar */}
-          {currentFlowId && (
-            <div className="flex items-center gap-2 px-4 py-2 border-b bg-muted/30">
-              <Input
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                placeholder="Enter user input to run the flow..."
-                className="flex-1"
-                onKeyDown={(e) => e.key === 'Enter' && !isRunning && handleRunFlow()}
-              />
-              <Button onClick={handleRunFlow} disabled={isRunning || !userInput.trim()}>
-                <Play className="h-4 w-4 mr-1" />
-                {isRunning ? 'Running...' : 'Run'}
-              </Button>
-            </div>
-          )}
-
-          <div className="flex-1">
-            <FlowCanvas />
-          </div>
+      {/* Main content with tabs */}
+      <Tabs defaultValue="build" className="flex-1 flex flex-col overflow-hidden min-h-0">
+        <div className="px-4 pt-2 border-b">
+          <TabsList>
+            <TabsTrigger value="build">Build</TabsTrigger>
+            <TabsTrigger value="test">Test</TabsTrigger>
+            <TabsTrigger value="results">Results</TabsTrigger>
+          </TabsList>
         </div>
 
-        {/* Right panel */}
-        {currentFlowId && (
-          <>
-            {selectedNodeId ? (
-              <NodeConfigPanel />
-            ) : (
-              <div className="w-80 border-l flex flex-col">
-                <div className="px-3 py-2 border-b">
-                  <h3 className="text-sm font-medium flex items-center gap-1.5">
-                    <FolderOpen className="h-3.5 w-3.5" /> Run History
-                  </h3>
-                </div>
-                <div className="flex-1 overflow-hidden">
-                  <RunHistory />
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </div>
+        <TabsContent value="build" className="flex-1 m-0 overflow-hidden data-[state=active]:flex data-[state=active]:flex-col">
+          <FlowEditor />
+        </TabsContent>
+
+        <TabsContent value="test" className="flex-1 m-0 overflow-hidden data-[state=active]:flex data-[state=active]:flex-col">
+          <TestTab />
+        </TabsContent>
+
+        <TabsContent value="results" className="flex-1 m-0 overflow-hidden data-[state=active]:flex data-[state=active]:flex-col">
+          <ResultsTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

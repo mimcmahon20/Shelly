@@ -78,3 +78,35 @@ export interface LLMResponse {
   content: string;
   tokensUsed: number;
 }
+
+// Test Suite Types
+export const RATING_DIMENSIONS = ['usability', 'responsiveness', 'design', 'quality', 'accuracy'] as const;
+export type RatingDimension = (typeof RATING_DIMENSIONS)[number];
+
+export interface TestInputSet {
+  id: string;
+  name: string;
+  inputs: string[];
+  createdAt: string;
+}
+
+export interface TestBatch {
+  id: string;
+  name: string;
+  inputSetId: string;
+  flowIds: string[];
+  runIds: string[];
+  status: 'pending' | 'running' | 'completed' | 'aborted' | 'failed';
+  progress: { completed: number; total: number };
+  createdAt: string;
+  completedAt?: string;
+}
+
+export interface RunRating {
+  id: string;
+  runId: string;
+  batchId: string;
+  ratings: Record<RatingDimension, number>;
+  notes?: string;
+  createdAt: string;
+}

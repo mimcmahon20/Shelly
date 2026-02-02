@@ -7,7 +7,7 @@ interface RunState {
   currentRunId: string | null;
 
   loadRuns: (flowId: string) => Promise<void>;
-  createRun: (flowId: string, userInput: string) => Run;
+  createRun: (flowId: string, userInput: string | Record<string, string>) => Run;
   updateRun: (runId: string, updates: Partial<Run>) => void;
   addNodeResult: (runId: string, result: NodeResult) => void;
   completeRun: (runId: string, finalOutput: string) => void;

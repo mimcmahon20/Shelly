@@ -85,7 +85,11 @@ export function BatchResults() {
               <tbody>
                 {runs.map((run) => (
                   <tr key={run.id} className="border-t">
-                    <td className="p-2 max-w-32 truncate">{run.userInput}</td>
+                    <td className="p-2 max-w-32 truncate">
+                      {typeof run.userInput === 'object'
+                        ? Object.entries(run.userInput).map(([k, v]) => `${k}: ${v}`).join(', ')
+                        : run.userInput}
+                    </td>
                     <td className="p-2 max-w-48">
                       <span
                         className="truncate block cursor-pointer hover:text-primary"

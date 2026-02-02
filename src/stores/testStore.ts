@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { TestInputSet, TestBatch, RunRating, Run, Flow } from '@/lib/types';
+import type { TestInputSet, TestBatch, RunRating, Run, Flow, InputValue } from '@/lib/types';
 import {
   saveInputSet, getAllInputSets, deleteInputSet,
   saveTestBatch, getAllTestBatches,
@@ -22,7 +22,7 @@ interface TestState {
   abortController: AbortController | null;
 
   loadInputSets: () => Promise<void>;
-  createInputSet: (name: string, inputs: string[]) => Promise<TestInputSet>;
+  createInputSet: (name: string, inputs: InputValue[], inputMode?: 'simple' | 'structured', fields?: string[]) => Promise<TestInputSet>;
   removeInputSet: (id: string) => Promise<void>;
 
   loadBatches: () => Promise<void>;
@@ -55,10 +55,12 @@ export const useTestStore = create<TestState>((set, get) => ({
     set({ inputSets });
   },
 
-  createInputSet: async (name, inputs) => {
+  createInputSet: async (name, inputs, inputMode = 'simple', fields) => {
     const inputSet: TestInputSet = {
       id: crypto.randomUUID(),
       name,
+      inputMode,
+      fields,
       inputs,
       createdAt: new Date().toISOString(),
     };
@@ -98,7 +100,7 @@ export const useTestStore = create<TestState>((set, get) => ({
     set((s) => ({ batches: [batch, ...s.batches], abortController: controller }));
     await saveTestBatch(batch);
 
-    const tasks: Array<{ flow: Flow; input: string }> = [];
+    const tasks: Array<{ flow: Flow; input: InputValue }> = [];
     for (const flowId of flowIds) {
       const flow = flows.find((f) => f.id === flowId);
       if (!flow) continue;

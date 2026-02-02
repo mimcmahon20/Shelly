@@ -59,7 +59,7 @@ export interface Run {
   id: string;
   flowId: string;
   status: 'running' | 'completed' | 'failed';
-  userInput: string;
+  userInput: string | Record<string, string>;
   nodeResults: NodeResult[];
   finalOutput: string;
   startedAt: string;
@@ -80,13 +80,17 @@ export interface LLMResponse {
 }
 
 // Test Suite Types
+export type InputValue = string | Record<string, string>;
+
 export const RATING_DIMENSIONS = ['usability', 'responsiveness', 'design', 'quality', 'accuracy'] as const;
 export type RatingDimension = (typeof RATING_DIMENSIONS)[number];
 
 export interface TestInputSet {
   id: string;
   name: string;
-  inputs: string[];
+  inputMode: 'simple' | 'structured';
+  fields?: string[];
+  inputs: InputValue[];
   createdAt: string;
 }
 

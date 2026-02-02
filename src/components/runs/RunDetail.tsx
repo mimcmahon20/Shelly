@@ -23,7 +23,7 @@ export function RunDetail() {
 
       <div>
         <p className="text-xs font-medium text-muted-foreground mb-1">User Input</p>
-        <pre className="text-sm bg-muted p-2 rounded-md whitespace-pre-wrap">{run.userInput}</pre>
+        <pre className="text-sm bg-muted p-2 rounded-md whitespace-pre-wrap">{typeof run.userInput === 'object' ? Object.entries(run.userInput).map(([k, v]) => `${k}: ${v}`).join(', ') : run.userInput}</pre>
       </div>
 
       <div>

@@ -87,7 +87,7 @@ async function executeNode(
   flow: Flow,
   node: FlowNode,
   results: ResultMap,
-  userInput: string,
+  userInput: string | Record<string, string>,
   onResult: (result: NodeResult) => void
 ): Promise<string | null> {
   const input = getIncomingData(flow, node.id, results) ?? userInput;
@@ -261,7 +261,7 @@ async function executeNode(
 
 export async function executeFlow(
   flow: Flow,
-  userInput: string,
+  userInput: string | Record<string, string>,
   onNodeResult: (result: NodeResult) => void
 ): Promise<{ results: NodeResult[]; finalOutput: string }> {
   const results: ResultMap = new Map();

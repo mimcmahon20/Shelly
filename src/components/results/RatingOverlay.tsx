@@ -102,7 +102,11 @@ export function RatingOverlay() {
       <div className="flex-1 flex overflow-hidden">
         {/* Left: output preview */}
         <div className="flex-1 overflow-auto p-4 border-r">
-          <div className="text-xs text-muted-foreground mb-2">Input: {currentRun?.userInput}</div>
+          <div className="text-xs text-muted-foreground mb-2">
+            Input: {currentRun ? (typeof currentRun.userInput === 'object'
+              ? Object.entries(currentRun.userInput).map(([k, v]) => `${k}: ${v}`).join(', ')
+              : currentRun.userInput) : ''}
+          </div>
           {isHtml ? (
             <iframe
               srcDoc={currentRun!.finalOutput}

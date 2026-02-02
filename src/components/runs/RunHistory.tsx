@@ -30,7 +30,7 @@ export function RunHistory() {
               className="w-full text-left rounded-md p-3 text-sm transition-colors hover:bg-accent/50"
             >
               <div className="flex items-center justify-between">
-                <span className="font-medium truncate max-w-[180px]">{run.userInput}</span>
+                <span className="font-medium truncate max-w-[180px]">{typeof run.userInput === 'object' ? Object.entries(run.userInput).map(([k, v]) => `${k}: ${v}`).join(', ') : run.userInput}</span>
                 <Badge
                   variant={run.status === 'completed' ? 'default' : run.status === 'failed' ? 'destructive' : 'secondary'}
                 >

@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Shelly
 
-## Getting Started
+A visual LLM flow builder. Create node-based prompt chains that execute sequentially against Claude and other LLM providers. All data stays client-side in IndexedDB.
 
-First, run the development server:
+## Quickstart
 
 ```bash
+# Install dependencies
+npm install
+
+# Start dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+You'll need an Anthropic API key. Enter it in the app settings — it's stored in localStorage (never sent to any server other than Anthropic's API).
 
-## Learn More
+## Commands
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run dev      # Dev server on localhost:3000
+npm run build    # Production build
+npm run start    # Serve production build
+npm run lint     # ESLint check
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Usage
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Create a new flow from the sidebar
+2. Add nodes to the canvas: **user-input**, **agent**, **structured-output**, **router**, **output**
+3. Connect nodes by dragging edges between them
+4. Configure each node (system prompts, templates, schemas, routing conditions)
+5. Use `{{variable}}` syntax in templates to reference upstream node outputs
+6. Run the flow — nodes execute sequentially from root to leaf
 
-## Deploy on Vercel
+## Node Types
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Node | Purpose |
+|------|---------|
+| **user-input** | Entry point — passes user input forward |
+| **agent** | LLM call with system prompt + message template |
+| **structured-output** | LLM call returning JSON matching a defined schema |
+| **router** | Conditional branching (equals, contains, gt, lt) |
+| **output** | Terminal node for displaying final results |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Tech Stack
+
+- Next.js 14 (App Router)
+- ReactFlow (canvas)
+- Zustand + IndexedDB (state & persistence)
+- shadcn/ui + Tailwind CSS (UI)
+- Anthropic SDK (LLM provider)
+
+## Changelog
+
+See [docs/CHANGELOG.md](docs/CHANGELOG.md) for version history.

@@ -53,3 +53,31 @@ API key is stored in localStorage.
 ### UI Stack
 
 shadcn/ui (New York style) with Radix primitives, Tailwind CSS (dark mode via class), Lucide icons. Path alias: `@/*` → `./src/*`.
+
+## Self-Improvement Protocol
+
+After every user follow-up that involves code changes, bug reports, corrections, or clarifications about how this codebase works, you MUST pause and evaluate:
+
+1. **CLAUDE.md update** — Does this interaction reveal missing or incorrect information in this file? Examples: undocumented patterns, architectural details, gotchas, conventions, or corrections. If so, update CLAUDE.md immediately.
+
+2. **Skill creation** — Is there a repeatable workflow emerging from this interaction that would benefit from a dedicated skill (slash command)? Examples: a specific deploy process, a repeated refactoring pattern, a common debugging workflow. If so, create or propose a skill for it.
+
+Ask yourself after each follow-up:
+- "Did I get something wrong that better documentation would have prevented?"
+- "Is the user repeating a request pattern that a skill would streamline?"
+- "Did I learn something about this codebase that future sessions should know?"
+
+When updating this file, keep entries concise and in the appropriate existing section. When creating skills, place them in `.claude/skills/`.
+
+3. **Changelog update** — After any feature, fix, or notable change, run `/update-docs` or manually update `docs/CHANGELOG.md` with the change. Follow semver (patch for fixes, minor for features).
+
+## Documentation
+
+- `docs/CHANGELOG.md` — Version history with all notable changes
+- `.claude/skills/update-docs.md` — `/update-docs` skill for updating changelog + docs after changes
+- `.claude/skills/self-improve.md` — `/self-improve` skill for meta-improvement of CLAUDE.md and skills
+- `.claude/skills/commit.md` — `/commit` skill for staging and committing with conventional commit format
+
+## Commit Convention
+
+All commits use conventional format: `type(scope): description`. Types: `feat`, `fix`, `style`, `refactor`, `docs`, `chore`, `test`, `perf`. Commits go to `main` during initial development.

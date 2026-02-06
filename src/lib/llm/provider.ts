@@ -1,4 +1,4 @@
-import type { LLMRequest, LLMResponse } from '@/lib/types';
+import type { LLMRequest, LLMResponse, ToolCallTrace, VirtualFileSystem } from '@/lib/types';
 
 export interface LLMProvider {
   chat(request: LLMRequest, apiKey: string): Promise<LLMResponse>;
@@ -82,4 +82,74 @@ export async function callLLM(request: LLMRequest): Promise<LLMResponse> {
   }
 
   return res.json();
+}
+
+export async function callLLMWithTools(
+  request: LLMRequest & { vfs: VirtualFileSystem; maxToolIterations?: number },
+  onToolCall?: (trace: ToolCallTrace) => void
+): Promise<LLMResponse> {
+  const provider = request.provider || 'anthropic';
+  const storageKey = API_KEY_MAP[provider] || 'shelly-api-key-anthropic';
+  const apiKey = typeof window !== 'undefined' ? localStorage.getItem(storageKey) || '' : '';
+
+  const res = await fetch('/api/llm/chat', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': apiKey,
+    },
+    body: JSON.stringify({
+      ...request,
+      toolsEnabled: true,
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`LLM call failed: ${text}`);
+  }
+
+  const reader = res.body?.getReader();
+  if (!reader) throw new Error('No response body');
+
+  const decoder = new TextDecoder();
+  let finalContent = '';
+  let finalTokensUsed = 0;
+  let finalToolCalls: ToolCallTrace[] = [];
+  let finalVfs: VirtualFileSystem = {};
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const json = line.slice(6).trim();
+      if (!json) continue;
+
+      const event = JSON.parse(json);
+      if (event.type === 'error') throw new Error(event.error);
+      if (event.type === 'tool_call' && onToolCall) {
+        onToolCall(event.trace);
+      }
+      if (event.type === 'done') {
+        finalContent = event.content;
+        finalTokensUsed = event.tokensUsed;
+        finalToolCalls = event.toolCalls || [];
+        finalVfs = event.vfs || {};
+      }
+    }
+  }
+
+  return {
+    content: finalContent,
+    tokensUsed: finalTokensUsed,
+    toolCalls: finalToolCalls,
+    vfs: finalVfs,
+  };
 }

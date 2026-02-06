@@ -1,5 +1,15 @@
 export type NodeType = 'user-input' | 'agent' | 'structured-output' | 'router' | 'output' | 'html-renderer';
 
+export type VirtualFileSystem = Record<string, string>;
+
+export interface ToolCallTrace {
+  id: string;
+  toolName: string;
+  input: Record<string, unknown>;
+  output: string;
+  iteration: number;
+}
+
 export interface RoutingRule {
   field: string;
   operator: 'equals' | 'contains' | 'gt' | 'lt';
@@ -18,6 +28,8 @@ export interface FlowNodeData {
   outputSchema?: string; // JSON schema as string
   routingRules?: RoutingRule[];
   defaultTargetNodeId?: string;
+  toolsEnabled?: boolean;
+  maxToolIterations?: number;
 }
 
 export interface FlowNode {
@@ -43,6 +55,7 @@ export interface Flow {
   edges: FlowEdge[];
   createdAt: string;
   updatedAt: string;
+  initialVfs?: VirtualFileSystem;
 }
 
 export interface NodeResult {
@@ -53,6 +66,8 @@ export interface NodeResult {
   tokensUsed?: number;
   latencyMs?: number;
   error?: string;
+  toolCalls?: ToolCallTrace[];
+  vfsSnapshot?: VirtualFileSystem;
 }
 
 export interface Run {
@@ -64,6 +79,7 @@ export interface Run {
   finalOutput: string;
   startedAt: string;
   completedAt?: string;
+  finalVfs?: VirtualFileSystem;
 }
 
 export interface LLMRequest {
@@ -72,11 +88,16 @@ export interface LLMRequest {
   systemPrompt: string;
   humanMessage: string;
   outputSchema?: string;
+  toolsEnabled?: boolean;
+  vfs?: VirtualFileSystem;
+  maxToolIterations?: number;
 }
 
 export interface LLMResponse {
   content: string;
   tokensUsed: number;
+  toolCalls?: ToolCallTrace[];
+  vfs?: VirtualFileSystem;
 }
 
 // Test Suite Types

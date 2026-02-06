@@ -118,6 +118,39 @@ export function NodeConfigPanel() {
           </>
         )}
 
+        {node.type === 'agent' && (
+          <>
+            <Separator />
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Enable Tools (VFS)</Label>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={!!node.data.toolsEnabled}
+                  onClick={() => updateNode(node.id, { toolsEnabled: !node.data.toolsEnabled })}
+                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${node.data.toolsEnabled ? 'bg-primary' : 'bg-muted'}`}
+                >
+                  <span className={`pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform ${node.data.toolsEnabled ? 'translate-x-4' : 'translate-x-0'}`} />
+                </button>
+              </div>
+              {node.data.toolsEnabled && (
+                <div>
+                  <Label>Max Tool Iterations</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={50}
+                    value={node.data.maxToolIterations ?? 10}
+                    onChange={(e) => updateNode(node.id, { maxToolIterations: parseInt(e.target.value) || 10 })}
+                    className="w-20"
+                  />
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
         {node.type === 'structured-output' && (
           <>
             <Separator />

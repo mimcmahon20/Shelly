@@ -1,6 +1,6 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import type { Flow, Run, TestInputSet, TestBatch, RunRating, FlowVersion } from './types';
-import { EXAMPLE_FLOW } from './exampleFlow';
+import { EXAMPLE_FLOW, EXAMPLE_VFS_FLOW } from './exampleFlow';
 
 interface ShellyDB extends DBSchema {
   flows: {
@@ -39,8 +39,8 @@ let dbPromise: Promise<IDBPDatabase<ShellyDB>> | null = null;
 
 function getDB() {
   if (!dbPromise) {
-    dbPromise = openDB<ShellyDB>('shelly', 3, {
-      upgrade(db, oldVersion) {
+    dbPromise = openDB<ShellyDB>('shelly', 4, {
+      upgrade(db, oldVersion, _newVersion, transaction) {
         if (oldVersion < 1) {
           const flowStore = db.createObjectStore('flows', { keyPath: 'id' });
           flowStore.createIndex('by-updated', 'updatedAt');
@@ -65,6 +65,9 @@ function getDB() {
         if (oldVersion < 3) {
           const versionStore = db.createObjectStore('flowVersions', { keyPath: 'id' });
           versionStore.createIndex('by-flow', 'flowId');
+        }
+        if (oldVersion < 4) {
+          transaction.objectStore('flows').put(EXAMPLE_VFS_FLOW);
         }
       },
     });
@@ -198,4 +201,5 @@ export async function resetDatabase() {
   await db.clear('runRatings');
   await db.clear('flowVersions');
   await db.put('flows', EXAMPLE_FLOW);
+  await db.put('flows', EXAMPLE_VFS_FLOW);
 }

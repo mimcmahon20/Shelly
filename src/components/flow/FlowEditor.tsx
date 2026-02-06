@@ -32,6 +32,7 @@ export function FlowEditor() {
     currentFlowId,
     persistCurrentFlow,
     getCurrentFlow,
+    updateFlowVfs,
     flows,
   } = useFlowStore();
 
@@ -80,17 +81,20 @@ export function FlowEditor() {
     const run = createRun(flow.id, input);
 
     try {
-      const { finalOutput } = await executeFlow(flow, input, (result) => {
+      const { finalOutput, finalVfs } = await executeFlow(flow, input, (result) => {
         addNodeResult(run.id, result);
       });
-      completeRun(run.id, finalOutput);
+      completeRun(run.id, finalOutput, finalVfs);
+      if (finalVfs && Object.keys(finalVfs).length > 0) {
+        updateFlowVfs(finalVfs);
+      }
     } catch (error) {
       failRun(run.id, error instanceof Error ? error.message : 'Unknown error');
     } finally {
       setIsRunning(false);
       await persistRun(run.id);
     }
-  }, [flow, canRun, useStructured, structuredInput, userInput, createRun, addNodeResult, completeRun, failRun, persistRun]);
+  }, [flow, canRun, useStructured, structuredInput, userInput, createRun, addNodeResult, completeRun, failRun, persistRun, updateFlowVfs]);
 
   return (
     <div className="flex-1 flex overflow-hidden min-h-0">

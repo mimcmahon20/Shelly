@@ -1,6 +1,6 @@
 'use client';
 import { Handle, Position, type NodeProps } from 'reactflow';
-import { Bot } from 'lucide-react';
+import { Bot, Wrench } from 'lucide-react';
 
 export function AgentNode({ data, selected }: NodeProps) {
   return (
@@ -12,6 +12,11 @@ export function AgentNode({ data, selected }: NodeProps) {
       </div>
       {data.systemPrompt && (
         <p className="mt-1 text-xs text-purple-600 dark:text-purple-400 truncate max-w-[200px]">{data.systemPrompt}</p>
+      )}
+      {data.toolsEnabled && (
+        <span className="text-[10px] text-purple-500 mt-1 flex items-center gap-0.5">
+          <Wrench className="h-3 w-3" /> Tools
+        </span>
       )}
       <Handle type="source" position={Position.Bottom} className="!bg-purple-500 !w-3 !h-3" />
     </div>

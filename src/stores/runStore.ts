@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Run, NodeResult } from '@/lib/types';
+import type { Run, NodeResult, VirtualFileSystem } from '@/lib/types';
 import { saveRun, getRunsByFlow } from '@/lib/db';
 
 interface RunState {
@@ -10,7 +10,7 @@ interface RunState {
   createRun: (flowId: string, userInput: string | Record<string, string>) => Run;
   updateRun: (runId: string, updates: Partial<Run>) => void;
   addNodeResult: (runId: string, result: NodeResult) => void;
-  completeRun: (runId: string, finalOutput: string) => void;
+  completeRun: (runId: string, finalOutput: string, finalVfs?: VirtualFileSystem) => void;
   failRun: (runId: string, error: string) => void;
   setCurrentRun: (id: string | null) => void;
   persistRun: (runId: string) => Promise<void>;
@@ -54,11 +54,11 @@ export const useRunStore = create<RunState>((set, get) => ({
     }));
   },
 
-  completeRun: (runId, finalOutput) => {
+  completeRun: (runId, finalOutput, finalVfs?) => {
     set((s) => ({
       runs: s.runs.map((r) =>
         r.id === runId
-          ? { ...r, status: 'completed' as const, finalOutput, completedAt: new Date().toISOString() }
+          ? { ...r, status: 'completed' as const, finalOutput, finalVfs, completedAt: new Date().toISOString() }
           : r
       ),
     }));

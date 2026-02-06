@@ -1,5 +1,5 @@
-import type { Flow, FlowNode, NodeResult, RoutingRule } from './types';
-import { callLLMStream } from './llm/provider';
+import type { Flow, FlowNode, NodeResult, RoutingRule, VirtualFileSystem } from './types';
+import { callLLMStream, callLLMWithTools } from './llm/provider';
 
 type ResultMap = Map<string, NodeResult>;
 
@@ -52,6 +52,39 @@ function interpolateTemplate(template: string, data: unknown): string {
   });
 }
 
+function assembleHtmlFromVfs(vfs: VirtualFileSystem): string | null {
+  // Find the HTML file
+  const htmlKey = Object.keys(vfs).find((k) => k === 'index.html') ??
+    Object.keys(vfs).find((k) => k.endsWith('.html'));
+  if (!htmlKey) return null;
+
+  let html = vfs[htmlKey];
+  const cssContent = vfs['style.css'] ?? vfs['styles.css'];
+  const jsContent = vfs['script.js'] ?? vfs['main.js'];
+
+  // Inline CSS: replace <link> referencing style.css/styles.css with <style> block
+  if (cssContent) {
+    const linkRe = /<link\s+[^>]*href=["'](?:\.\/)?styles?\.css["'][^>]*\/?>/gi;
+    if (linkRe.test(html)) {
+      html = html.replace(linkRe, `<style>\n${cssContent}\n</style>`);
+    } else if (html.includes('</head>')) {
+      html = html.replace('</head>', `<style>\n${cssContent}\n</style>\n</head>`);
+    }
+  }
+
+  // Inline JS: replace <script src="script.js/main.js"> with inline <script>
+  if (jsContent) {
+    const scriptRe = /<script\s+[^>]*src=["'](?:\.\/)?(?:script|main)\.js["'][^>]*>\s*<\/script>/gi;
+    if (scriptRe.test(html)) {
+      html = html.replace(scriptRe, `<script>\n${jsContent}\n</script>`);
+    } else if (html.includes('</body>')) {
+      html = html.replace('</body>', `<script>\n${jsContent}\n</script>\n</body>`);
+    }
+  }
+
+  return html;
+}
+
 function evaluateRule(rule: RoutingRule, data: unknown): boolean {
   if (typeof data !== 'object' || data === null) return false;
   const obj = data as Record<string, unknown>;
@@ -88,8 +121,9 @@ async function executeNode(
   node: FlowNode,
   results: ResultMap,
   userInput: string | Record<string, string>,
-  onResult: (result: NodeResult) => void
-): Promise<string | null> {
+  onResult: (result: NodeResult) => void,
+  vfs?: VirtualFileSystem
+): Promise<{ nextNodeId: string | null; vfs?: VirtualFileSystem }> {
   const input = getIncomingData(flow, node.id, results) ?? userInput;
   const start = Date.now();
 
@@ -106,12 +140,42 @@ async function executeNode(
         results.set(node.id, result);
         onResult(result);
         const next = getAdjacentNodes(flow, node.id);
-        return next[0] ?? null;
+        return { nextNodeId: next[0] ?? null, vfs };
       }
 
       case 'agent': {
         const humanMessage = interpolateTemplate(node.data.humanMessageTemplate || '', input);
         const systemPrompt = node.data.systemPrompt || 'You are a helpful assistant.';
+
+        if (node.data.toolsEnabled && vfs) {
+          const llmResult = await callLLMWithTools({
+            provider: node.data.provider,
+            model: node.data.model,
+            systemPrompt,
+            humanMessage,
+            toolsEnabled: true,
+            vfs: { ...vfs },
+            maxToolIterations: node.data.maxToolIterations || 10,
+          });
+
+          // Update shared VFS with mutations
+          const updatedVfs = llmResult.vfs ? { ...llmResult.vfs } : vfs;
+
+          const result: NodeResult = {
+            nodeId: node.id,
+            nodeType: node.type,
+            input: humanMessage,
+            output: llmResult.content,
+            tokensUsed: llmResult.tokensUsed,
+            latencyMs: Date.now() - start,
+            toolCalls: llmResult.toolCalls,
+            vfsSnapshot: llmResult.vfs,
+          };
+          results.set(node.id, result);
+          onResult(result);
+          const next = getAdjacentNodes(flow, node.id);
+          return { nextNodeId: next[0] ?? null, vfs: updatedVfs };
+        }
 
         const llmResult = await callLLMStream({
           provider: node.data.provider,
@@ -131,7 +195,7 @@ async function executeNode(
         results.set(node.id, result);
         onResult(result);
         const next = getAdjacentNodes(flow, node.id);
-        return next[0] ?? null;
+        return { nextNodeId: next[0] ?? null, vfs };
       }
 
       case 'structured-output': {
@@ -164,7 +228,7 @@ async function executeNode(
         results.set(node.id, result);
         onResult(result);
         const next = getAdjacentNodes(flow, node.id);
-        return next[0] ?? null;
+        return { nextNodeId: next[0] ?? null, vfs };
       }
 
       case 'router': {
@@ -205,14 +269,21 @@ async function executeNode(
         };
         results.set(node.id, result);
         onResult(result);
-        return targetNodeId;
+        return { nextNodeId: targetNodeId, vfs };
       }
 
       case 'html-renderer': {
-        // Pass-through node: extract HTML from input and forward it
-        let htmlContent: unknown = input;
-        if (typeof input === 'object' && input !== null && 'html' in input) {
-          htmlContent = (input as Record<string, unknown>).html;
+        // Try assembling from VFS first, then fall back to upstream input
+        let htmlContent: unknown = null;
+        if (vfs) {
+          const assembled = assembleHtmlFromVfs(vfs);
+          if (assembled) htmlContent = assembled;
+        }
+        if (htmlContent === null) {
+          htmlContent = input;
+          if (typeof input === 'object' && input !== null && 'html' in input) {
+            htmlContent = (input as Record<string, unknown>).html;
+          }
         }
         const htmlResult: NodeResult = {
           nodeId: node.id,
@@ -220,11 +291,12 @@ async function executeNode(
           input,
           output: htmlContent,
           latencyMs: Date.now() - start,
+          vfsSnapshot: vfs ? { ...vfs } : undefined,
         };
         results.set(node.id, htmlResult);
         onResult(htmlResult);
         const nextHtml = getAdjacentNodes(flow, node.id);
-        return nextHtml[0] ?? null;
+        return { nextNodeId: nextHtml[0] ?? null, vfs };
       }
 
       case 'output': {
@@ -238,11 +310,11 @@ async function executeNode(
         };
         results.set(node.id, result);
         onResult(result);
-        return null; // terminal
+        return { nextNodeId: null, vfs }; // terminal
       }
 
       default:
-        return null;
+        return { nextNodeId: null, vfs };
     }
   } catch (error) {
     const result: NodeResult = {
@@ -259,11 +331,15 @@ async function executeNode(
   }
 }
 
+function hasToolEnabledNode(flow: Flow): boolean {
+  return flow.nodes.some((n) => n.data.toolsEnabled);
+}
+
 export async function executeFlow(
   flow: Flow,
   userInput: string | Record<string, string>,
   onNodeResult: (result: NodeResult) => void
-): Promise<{ results: NodeResult[]; finalOutput: string }> {
+): Promise<{ results: NodeResult[]; finalOutput: string; finalVfs?: VirtualFileSystem }> {
   const results: ResultMap = new Map();
   const startNodes = findStartNodes(flow);
 
@@ -273,23 +349,33 @@ export async function executeFlow(
 
   let currentNodeId: string | null = startNodes[0].id;
   let finalOutput = '';
+  let vfs: VirtualFileSystem | undefined;
+
+  if (flow.initialVfs || hasToolEnabledNode(flow)) {
+    vfs = flow.initialVfs ? { ...flow.initialVfs } : {};
+  }
 
   while (currentNodeId) {
     const node = flow.nodes.find((n) => n.id === currentNodeId);
     if (!node) throw new Error(`Node ${currentNodeId} not found`);
 
-    const nextNodeId = await executeNode(flow, node, results, userInput, onNodeResult);
+    const execResult = await executeNode(flow, node, results, userInput, onNodeResult, vfs);
+
+    if (execResult.vfs) {
+      vfs = execResult.vfs;
+    }
 
     if (node.type === 'output') {
       const result = results.get(node.id);
       finalOutput = typeof result?.output === 'string' ? result.output : JSON.stringify(result?.output);
     }
 
-    currentNodeId = nextNodeId;
+    currentNodeId = execResult.nextNodeId;
   }
 
   return {
     results: Array.from(results.values()),
     finalOutput,
+    finalVfs: vfs,
   };
 }

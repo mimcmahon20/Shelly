@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Flow, FlowNode, FlowEdge } from '@/lib/types';
+import type { Flow, FlowNode, FlowEdge, VirtualFileSystem } from '@/lib/types';
 import { saveFlow, getAllFlows, deleteFlow as dbDeleteFlow, getFlow } from '@/lib/db';
 
 function generateId() {
@@ -28,6 +28,7 @@ interface FlowState {
   setNodes: (nodes: FlowNode[]) => void;
   setEdges: (edges: FlowEdge[]) => void;
   persistCurrentFlow: () => Promise<void>;
+  updateFlowVfs: (vfs: VirtualFileSystem) => void;
 
   getCurrentFlow: () => Flow | undefined;
 }
@@ -183,6 +184,14 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   persistCurrentFlow: async () => {
     const flow = get().getCurrentFlow();
     if (flow) await saveFlow(flow);
+  },
+
+  updateFlowVfs: (vfs) => {
+    const state = get();
+    const flow = state.flows.find((f) => f.id === state.currentFlowId);
+    if (!flow) return;
+    const updated = { ...flow, initialVfs: vfs, updatedAt: new Date().toISOString() };
+    set((s) => ({ flows: s.flows.map((f) => (f.id === updated.id ? updated : f)) }));
   },
 
   getCurrentFlow: () => {

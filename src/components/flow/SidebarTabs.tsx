@@ -5,11 +5,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RunHistory } from '@/components/runs/RunHistory';
 import { VersionPanel } from '@/components/flow/VersionPanel';
 import { NodeConfigPanel } from '@/components/flow/NodeConfigPanel';
+import { VfsEditor } from '@/components/flow/VfsEditor';
 
 export function SidebarTabs() {
   const selectedNodeId = useFlowStore((s) => s.selectedNodeId);
+  const flow = useFlowStore((s) => s.getCurrentFlow());
   const [activeTab, setActiveTab] = useState('runs');
   const prevTabRef = useRef('runs');
+
+  const fileCount = flow?.initialVfs ? Object.keys(flow.initialVfs).length : 0;
 
   useEffect(() => {
     if (selectedNodeId) {
@@ -27,6 +31,9 @@ export function SidebarTabs() {
         <TabsList className="w-full justify-start rounded-none border-b bg-transparent px-2 shrink-0">
           <TabsTrigger value="runs" className="text-xs">Runs</TabsTrigger>
           <TabsTrigger value="versions" className="text-xs">Versions</TabsTrigger>
+          <TabsTrigger value="files" className="text-xs">
+            Files{fileCount > 0 && ` (${fileCount})`}
+          </TabsTrigger>
           {selectedNodeId && (
             <TabsTrigger value="node" className="text-xs">Node</TabsTrigger>
           )}
@@ -36,6 +43,9 @@ export function SidebarTabs() {
         </TabsContent>
         <TabsContent value="versions" className="flex-1 overflow-auto mt-0">
           <VersionPanel />
+        </TabsContent>
+        <TabsContent value="files" className="flex-1 overflow-auto mt-0">
+          <VfsEditor />
         </TabsContent>
         {selectedNodeId && (
           <TabsContent value="node" className="flex-1 overflow-auto mt-0">

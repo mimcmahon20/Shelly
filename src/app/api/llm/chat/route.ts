@@ -20,6 +20,33 @@ export async function POST(req: NextRequest) {
   try {
     const provider = getProvider(body.provider);
 
+    if (body.toolsEnabled && provider instanceof AnthropicProvider) {
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            for await (const event of provider.chatWithTools(body, apiKey)) {
+              const data = JSON.stringify(event);
+              controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+            }
+          } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unknown error';
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'error', error: message })}\n\n`));
+          } finally {
+            controller.close();
+          }
+        },
+      });
+
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          Connection: 'keep-alive',
+        },
+      });
+    }
+
     if (streamRequested && provider instanceof AnthropicProvider) {
       const encoder = new TextEncoder();
       const stream = new ReadableStream({

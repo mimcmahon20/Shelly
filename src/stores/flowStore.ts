@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { Flow, FlowNode, FlowEdge, VirtualFileSystem } from '@/lib/types';
-import { saveFlow, getAllFlows, deleteFlow as dbDeleteFlow, getFlow } from '@/lib/db';
+import { saveFlow, getAllFlows, deleteFlow as dbDeleteFlow, getFlow, getFlowVersionsByFlow, saveFlowVersion } from '@/lib/db';
 
 function generateId() {
   return crypto.randomUUID();
@@ -15,6 +15,7 @@ interface FlowState {
   createFlow: (name: string) => Promise<Flow>;
   loadFlow: (id: string) => Promise<void>;
   deleteFlow: (id: string) => Promise<void>;
+  duplicateFlow: (flowId: string) => Promise<void>;
   setCurrentFlow: (id: string | null) => void;
   selectNode: (id: string | null) => void;
 
@@ -82,6 +83,35 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       flows: s.flows.filter((f) => f.id !== id),
       currentFlowId: s.currentFlowId === id ? null : s.currentFlowId,
     }));
+  },
+
+  duplicateFlow: async (flowId: string) => {
+    const original = get().flows.find((f) => f.id === flowId);
+    if (!original) return;
+
+    const newId = generateId();
+    const now = new Date().toISOString();
+
+    const duplicate: Flow = {
+      ...structuredClone(original),
+      id: newId,
+      name: `${original.name} (Copy)`,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await saveFlow(duplicate);
+
+    const versions = await getFlowVersionsByFlow(flowId);
+    for (const v of versions) {
+      await saveFlowVersion({
+        ...structuredClone(v),
+        id: generateId(),
+        flowId: newId,
+      });
+    }
+
+    set((s) => ({ flows: [...s.flows, duplicate], currentFlowId: newId }));
   },
 
   setCurrentFlow: (id) => set({ currentFlowId: id, selectedNodeId: null }),

@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Settings, Trash2, Download, Upload, RotateCcw, X, HelpCircle } from 'lucide-react';
+import { Plus, Settings, Trash2, Download, Upload, RotateCcw, X, HelpCircle, Copy } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { HowToModal } from '@/components/HowToModal';
 import { resetDatabase } from '@/lib/db';
@@ -27,6 +27,7 @@ export default function Home() {
     createFlow,
     setCurrentFlow,
     deleteFlow,
+    duplicateFlow,
     getCurrentFlow,
   } = useFlowStore();
 
@@ -140,6 +141,9 @@ export default function Home() {
         <div className="flex items-center gap-2">
           {currentFlowId && (
             <>
+              <Button variant="outline" size="sm" onClick={() => duplicateFlow(currentFlowId)}>
+                <Copy className="h-3 w-3 mr-1" /> Duplicate
+              </Button>
               <Button variant="outline" size="sm" onClick={handleExportFlow}>
                 <Download className="h-3 w-3 mr-1" /> Export
               </Button>

@@ -6,6 +6,13 @@ Format: Versions are grouped by release. Each entry includes the date and a summ
 
 ---
 
+## v0.6.2 — 2026-02-05
+
+### Added
+- Duplicate flow button — copies nodes, edges, VFS files, and saved versions (but not runs or test batches)
+
+---
+
 ## v0.6.1 — 2026-02-05
 
 ### Changed

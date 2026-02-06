@@ -249,6 +249,84 @@ export function HowToModal({ open, onOpenChange }: HowToModalProps) {
             </p>
           </section>
 
+          <Separator />
+
+          {/* Changelog */}
+          <section>
+            <h3 className="font-semibold text-base mb-2">Changelog</h3>
+            <div className="space-y-4 text-muted-foreground">
+
+              <div>
+                <h4 className="font-medium text-foreground text-sm">v0.6.1 — 2026-02-05</h4>
+                <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
+                  <li>Rethemed VFS example flow as &quot;Educational Game Builder&quot; with classifier/router branching</li>
+                  <li>Generate path: Planner (Haiku) + Generator (Opus) builds games with VFS tools</li>
+                  <li>Edit path: Editor (Opus) makes surgical edits to existing game files</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-foreground text-sm">v0.6.0 — 2026-02-05</h4>
+                <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
+                  <li>Agentic tool-call loop for agent nodes with VFS tools (view, edit, create_file, list_files)</li>
+                  <li>Virtual filesystem shared across tool-enabled nodes within a run</li>
+                  <li>Tool call trace display in node results</li>
+                  <li>VFS snapshot viewer in node results and run detail</li>
+                  <li>&quot;Files&quot; tab in sidebar with VFS editor for seeding initial files</li>
+                  <li>&quot;Enable Tools&quot; toggle and &quot;Max Tool Iterations&quot; config on agent nodes</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-foreground text-sm">v0.5.0 — 2026-02-02</h4>
+                <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
+                  <li>Dark mode support</li>
+                  <li>Split view layout for right sidebar</li>
+                  <li>Instructions / how-to modal</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-foreground text-sm">v0.4.0 — 2026-02-01</h4>
+                <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
+                  <li>Flow versioning system</li>
+                  <li>Parameterized user inputs</li>
+                  <li>Batch execution support</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-foreground text-sm">v0.3.0 — 2026-01-30</h4>
+                <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
+                  <li>HTML renderer node output</li>
+                  <li>Streaming responses from LLM calls</li>
+                  <li>Increased token limit for completions</li>
+                  <li>Example flows and Opus model support</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-foreground text-sm">v0.2.0 — 2026-01-29</h4>
+                <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
+                  <li>OpenAI and Anthropic provider integrations</li>
+                  <li>Multi-provider LLM architecture</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-foreground text-sm">v0.1.0 — 2026-01-29</h4>
+                <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
+                  <li>Initial project scaffold (Next.js 14 App Router)</li>
+                  <li>ReactFlow canvas with node-based flow builder</li>
+                  <li>Core node types: user-input, agent, structured-output, router, output</li>
+                  <li>Flow execution engine with sequential processing</li>
+                  <li>IndexedDB persistence via Zustand stores</li>
+                </ul>
+              </div>
+
+            </div>
+          </section>
+
         </div>
       </DialogContent>
     </Dialog>

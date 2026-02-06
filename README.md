@@ -41,7 +41,7 @@ npm run lint     # ESLint check
 | Node | Purpose |
 |------|---------|
 | **user-input** | Entry point — passes user input forward |
-| **agent** | LLM call with system prompt + message template |
+| **agent** | LLM call with system prompt + message template (optionally with VFS tool-call loop) |
 | **structured-output** | LLM call returning JSON matching a defined schema |
 | **router** | Conditional branching (equals, contains, gt, lt) |
 | **output** | Terminal node for displaying final results |

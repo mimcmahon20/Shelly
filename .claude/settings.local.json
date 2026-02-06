@@ -18,7 +18,9 @@
       "Bash(osascript:*)",
       "Bash(mdfind:*)",
       "Bash(chmod:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

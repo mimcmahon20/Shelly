@@ -6,6 +6,29 @@ Format: Versions are grouped by release. Each entry includes the date and a summ
 
 ---
 
+## v0.6.1 — 2026-02-05
+
+### Changed
+- Rethemed VFS example flow as "Educational Game Builder" with classifier → router branching (generate vs edit paths)
+- Generate path: Planner (Haiku) designs visual brief, Generator (Opus) builds game with VFS tools
+- Edit path: Editor (Opus) makes surgical edits to existing game files
+- Enforced design rules: no emojis, no gradients, bold flat colors, start/end screens, scoring, timer
+
+---
+
+## v0.6.0 — 2026-02-05
+
+### Added
+- Agentic tool-call loop for agent nodes with virtual filesystem (VFS) tools: `view`, `edit`, `create_file`, `list_files`
+- Virtual filesystem shared across tool-enabled nodes within a single run execution
+- Tool call trace display in node results (expandable per-tool input/output with iteration tracking)
+- VFS snapshot viewer in node results and final VFS section in run detail
+- "Files" tab in sidebar with VFS editor for seeding initial files per flow
+- "Enable Tools" toggle and "Max Tool Iterations" config on agent nodes
+- Tools badge indicator on agent nodes in the canvas
+
+---
+
 ## v0.5.0 — 2026-02-02
 
 ### Added

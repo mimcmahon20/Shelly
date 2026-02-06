@@ -26,7 +26,7 @@ Shelly is a **client-side visual LLM flow builder** built with Next.js 14 App Ro
 ### Node Types (defined in `src/lib/types.ts`, executed in `src/lib/engine.ts`)
 
 - **user-input** — entry point, passes user input forward
-- **agent** — LLM call with system prompt + message template
+- **agent** — LLM call with system prompt + message template. When `toolsEnabled`, runs an agentic tool loop with virtual filesystem tools (view, edit, create_file, list_files)
 - **structured-output** — LLM call returning JSON matching a schema (uses tool_use)
 - **router** — conditional branching (equals/contains/gt/lt operators)
 - **output** — terminal node for final results
@@ -41,14 +41,20 @@ Two Zustand stores with IndexedDB persistence:
 
 API key is stored in localStorage.
 
+### Virtual Filesystem (VFS)
+
+Tool-enabled agent nodes operate on a `VirtualFileSystem` (`Record<string, string>`) stored at the flow level as `initialVfs`. During execution, VFS state is shared across all tool-enabled nodes — mutations from one agent are visible to downstream agents. The agentic tool loop runs server-side in the API route (`chatWithTools()`) to avoid multiple client-server round-trips. Tool calls are traced per-node via `ToolCallTrace[]` for UI inspection.
+
 ### Key Files
 
-- `src/lib/engine.ts` — flow execution engine, node processing logic
-- `src/lib/llm/provider.ts` — LLM provider interface
-- `src/lib/llm/anthropic.ts` — Anthropic SDK integration
+- `src/lib/engine.ts` — flow execution engine, node processing logic, VFS threading
+- `src/lib/vfs.ts` — virtual filesystem tool execution + Anthropic tool definitions
+- `src/lib/llm/provider.ts` — LLM provider interface + `callLLMWithTools()` client function
+- `src/lib/llm/anthropic.ts` — Anthropic SDK integration + `chatWithTools()` agentic loop
 - `src/lib/db.ts` — IndexedDB schema (two stores: `flows`, `runs`)
-- `src/app/api/llm/chat/route.ts` — API route proxying LLM calls (auth via X-API-Key header)
+- `src/app/api/llm/chat/route.ts` — API route proxying LLM calls (auth via X-API-Key header), tool-enabled SSE branch
 - `src/components/flow/FlowCanvas.tsx` — ReactFlow wrapper with bidirectional Zustand sync (uses debounce + syncing flag to prevent loops)
+- `src/components/flow/VfsEditor.tsx` — flow-level VFS file editor (sidebar "Files" tab)
 
 ### UI Stack
 

@@ -1,12 +1,12 @@
 import { create } from 'zustand';
-import type { FlowVersion, FlowNode, FlowEdge } from '@/lib/types';
+import type { FlowVersion, FlowNode, FlowEdge, VirtualFileSystem } from '@/lib/types';
 import { saveFlowVersion, getFlowVersionsByFlow, deleteFlowVersion as dbDeleteVersion } from '@/lib/db';
 import { useFlowStore } from './flowStore';
 
 interface VersionState {
   versions: FlowVersion[];
   loadVersions: (flowId: string) => Promise<void>;
-  createVersion: (flowId: string, label: string, nodes: FlowNode[], edges: FlowEdge[]) => Promise<void>;
+  createVersion: (flowId: string, label: string, nodes: FlowNode[], edges: FlowEdge[], initialVfs?: VirtualFileSystem) => Promise<void>;
   deleteVersion: (id: string) => Promise<void>;
   restoreVersion: (versionId: string) => void;
 }
@@ -20,13 +20,14 @@ export const useVersionStore = create<VersionState>((set, get) => ({
     set({ versions });
   },
 
-  createVersion: async (flowId, label, nodes, edges) => {
+  createVersion: async (flowId, label, nodes, edges, initialVfs) => {
     const version: FlowVersion = {
       id: crypto.randomUUID(),
       flowId,
       label,
       nodes: structuredClone(nodes),
       edges: structuredClone(edges),
+      initialVfs: initialVfs ? structuredClone(initialVfs) : undefined,
       createdAt: new Date().toISOString(),
     };
     await saveFlowVersion(version);
@@ -41,8 +42,11 @@ export const useVersionStore = create<VersionState>((set, get) => ({
   restoreVersion: (versionId) => {
     const version = get().versions.find((v) => v.id === versionId);
     if (!version) return;
-    const { setNodes, setEdges } = useFlowStore.getState();
+    const { setNodes, setEdges, updateFlowVfs } = useFlowStore.getState();
     setNodes(structuredClone(version.nodes));
     setEdges(structuredClone(version.edges));
+    if (version.initialVfs) {
+      updateFlowVfs(structuredClone(version.initialVfs));
+    }
   },
 }));

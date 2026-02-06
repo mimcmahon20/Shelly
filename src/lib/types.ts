@@ -163,5 +163,6 @@ export interface FlowVersion {
   label: string;
   nodes: FlowNode[];
   edges: FlowEdge[];
+  initialVfs?: VirtualFileSystem;
   createdAt: string;
 }

@@ -17,7 +17,7 @@ export function VersionPanel() {
 
   const handleSave = async () => {
     if (!flow || !label.trim()) return;
-    await createVersion(flow.id, label.trim(), flow.nodes, flow.edges);
+    await createVersion(flow.id, label.trim(), flow.nodes, flow.edges, flow.initialVfs);
     setLabel('');
   };
 

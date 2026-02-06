@@ -6,6 +6,13 @@ Format: Versions are grouped by release. Each entry includes the date and a summ
 
 ---
 
+## v0.7.2 — 2026-02-05
+
+### Fixed
+- Flow versions now snapshot and restore VFS (virtual filesystem) files — previously only nodes and edges were captured
+
+---
+
 ## v0.7.1 — 2026-02-05
 
 ### Added

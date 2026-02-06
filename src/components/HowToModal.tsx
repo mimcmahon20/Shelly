@@ -245,6 +245,7 @@ export function HowToModal({ open, onOpenChange }: HowToModalProps) {
             <h3 className="font-semibold text-base mb-2">Versions</h3>
             <p className="text-muted-foreground">
               Save and restore flow snapshots from the <strong>Versions</strong> panel in the right sidebar.
+              Versions capture nodes, edges, and VFS files, so restoring a version fully reverts the flow.
               This lets you experiment with changes while keeping previous states available to roll back to.
             </p>
           </section>
@@ -255,6 +256,13 @@ export function HowToModal({ open, onOpenChange }: HowToModalProps) {
           <section>
             <h3 className="font-semibold text-base mb-2">Changelog</h3>
             <div className="space-y-4 text-muted-foreground">
+
+              <div>
+                <h4 className="font-medium text-foreground text-sm">v0.7.2 — 2026-02-05</h4>
+                <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
+                  <li>Flow versions now snapshot and restore VFS files</li>
+                </ul>
+              </div>
 
               <div>
                 <h4 className="font-medium text-foreground text-sm">v0.7.1 — 2026-02-05</h4>

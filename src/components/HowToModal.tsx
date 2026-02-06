@@ -257,6 +257,16 @@ export function HowToModal({ open, onOpenChange }: HowToModalProps) {
             <div className="space-y-4 text-muted-foreground">
 
               <div>
+                <h4 className="font-medium text-foreground text-sm">v0.7.0 — 2026-02-05</h4>
+                <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
+                  <li>Real-time streaming in run drawer — live text, tool calls, and blinking cursor</li>
+                  <li>Streaming status card with spinner, elapsed timer, and auto-scroll</li>
+                  <li>Per-node and total run cost tracking (input/output token split)</li>
+                  <li>Token breakdown tooltip on node result badges</li>
+                </ul>
+              </div>
+
+              <div>
                 <h4 className="font-medium text-foreground text-sm">v0.6.2 — 2026-02-05</h4>
                 <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
                   <li>Duplicate flow button — copies nodes, edges, VFS files, and saved versions</li>

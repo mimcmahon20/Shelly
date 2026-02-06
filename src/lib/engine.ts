@@ -1,4 +1,4 @@
-import type { Flow, FlowNode, NodeResult, RoutingRule, VirtualFileSystem } from './types';
+import type { Flow, FlowNode, NodeResult, RoutingRule, VirtualFileSystem, StreamCallbacks } from './types';
 import { callLLMStream, callLLMWithTools } from './llm/provider';
 
 type ResultMap = Map<string, NodeResult>;
@@ -122,10 +122,13 @@ async function executeNode(
   results: ResultMap,
   userInput: string | Record<string, string>,
   onResult: (result: NodeResult) => void,
-  vfs?: VirtualFileSystem
+  vfs?: VirtualFileSystem,
+  streamCallbacks?: StreamCallbacks
 ): Promise<{ nextNodeId: string | null; vfs?: VirtualFileSystem }> {
   const input = getIncomingData(flow, node.id, results) ?? userInput;
   const start = Date.now();
+
+  streamCallbacks?.onNodeStart(node.id, node.type, node.data.label);
 
   try {
     switch (node.type) {
@@ -148,15 +151,19 @@ async function executeNode(
         const systemPrompt = node.data.systemPrompt || 'You are a helpful assistant.';
 
         if (node.data.toolsEnabled && vfs) {
-          const llmResult = await callLLMWithTools({
-            provider: node.data.provider,
-            model: node.data.model,
-            systemPrompt,
-            humanMessage,
-            toolsEnabled: true,
-            vfs: { ...vfs },
-            maxToolIterations: node.data.maxToolIterations || 10,
-          });
+          const llmResult = await callLLMWithTools(
+            {
+              provider: node.data.provider,
+              model: node.data.model,
+              systemPrompt,
+              humanMessage,
+              toolsEnabled: true,
+              vfs: { ...vfs },
+              maxToolIterations: node.data.maxToolIterations || 10,
+            },
+            streamCallbacks ? (trace) => streamCallbacks.onToolCall(node.id, trace) : undefined,
+            streamCallbacks ? (text) => streamCallbacks.onDelta(node.id, text) : undefined
+          );
 
           // Update shared VFS with mutations
           const updatedVfs = llmResult.vfs ? { ...llmResult.vfs } : vfs;
@@ -167,6 +174,9 @@ async function executeNode(
             input: humanMessage,
             output: llmResult.content,
             tokensUsed: llmResult.tokensUsed,
+            inputTokens: llmResult.inputTokens,
+            outputTokens: llmResult.outputTokens,
+            model: node.data.model,
             latencyMs: Date.now() - start,
             toolCalls: llmResult.toolCalls,
             vfsSnapshot: llmResult.vfs,
@@ -177,12 +187,15 @@ async function executeNode(
           return { nextNodeId: next[0] ?? null, vfs: updatedVfs };
         }
 
-        const llmResult = await callLLMStream({
-          provider: node.data.provider,
-          model: node.data.model,
-          systemPrompt,
-          humanMessage,
-        });
+        const llmResult = await callLLMStream(
+          {
+            provider: node.data.provider,
+            model: node.data.model,
+            systemPrompt,
+            humanMessage,
+          },
+          streamCallbacks ? (text) => streamCallbacks.onDelta(node.id, text) : undefined
+        );
 
         const result: NodeResult = {
           nodeId: node.id,
@@ -190,6 +203,9 @@ async function executeNode(
           input: humanMessage,
           output: llmResult.content,
           tokensUsed: llmResult.tokensUsed,
+          inputTokens: llmResult.inputTokens,
+          outputTokens: llmResult.outputTokens,
+          model: node.data.model,
           latencyMs: Date.now() - start,
         };
         results.set(node.id, result);
@@ -202,13 +218,16 @@ async function executeNode(
         const humanMessage = interpolateTemplate(node.data.humanMessageTemplate || '', input);
         const systemPrompt = node.data.systemPrompt || 'You are a helpful assistant. Return structured data.';
 
-        const llmResult = await callLLMStream({
-          provider: node.data.provider,
-          model: node.data.model,
-          systemPrompt,
-          humanMessage,
-          outputSchema: node.data.outputSchema,
-        });
+        const llmResult = await callLLMStream(
+          {
+            provider: node.data.provider,
+            model: node.data.model,
+            systemPrompt,
+            humanMessage,
+            outputSchema: node.data.outputSchema,
+          },
+          streamCallbacks ? (text) => streamCallbacks.onDelta(node.id, text) : undefined
+        );
 
         let parsed: unknown;
         try {
@@ -223,6 +242,9 @@ async function executeNode(
           input: humanMessage,
           output: parsed,
           tokensUsed: llmResult.tokensUsed,
+          inputTokens: llmResult.inputTokens,
+          outputTokens: llmResult.outputTokens,
+          model: node.data.model,
           latencyMs: Date.now() - start,
         };
         results.set(node.id, result);
@@ -338,7 +360,8 @@ function hasToolEnabledNode(flow: Flow): boolean {
 export async function executeFlow(
   flow: Flow,
   userInput: string | Record<string, string>,
-  onNodeResult: (result: NodeResult) => void
+  onNodeResult: (result: NodeResult) => void,
+  streamCallbacks?: StreamCallbacks
 ): Promise<{ results: NodeResult[]; finalOutput: string; finalVfs?: VirtualFileSystem }> {
   const results: ResultMap = new Map();
   const startNodes = findStartNodes(flow);
@@ -359,7 +382,7 @@ export async function executeFlow(
     const node = flow.nodes.find((n) => n.id === currentNodeId);
     if (!node) throw new Error(`Node ${currentNodeId} not found`);
 
-    const execResult = await executeNode(flow, node, results, userInput, onNodeResult, vfs);
+    const execResult = await executeNode(flow, node, results, userInput, onNodeResult, vfs, streamCallbacks);
 
     if (execResult.vfs) {
       vfs = execResult.vfs;

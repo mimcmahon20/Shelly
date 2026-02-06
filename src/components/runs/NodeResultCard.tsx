@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Globe, ChevronDown, ChevronRight, FileText } from 'lucide-react';
 import { HtmlPreviewModal } from '@/components/shared/HtmlPreviewModal';
 import type { NodeResult } from '@/lib/types';
+import { calculateCost, formatCost } from '@/lib/cost';
 
 export function NodeResultCard({ result }: { result: NodeResult }) {
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -21,6 +22,9 @@ export function NodeResultCard({ result }: { result: NodeResult }) {
   const htmlContent = isHtmlRenderer && typeof result.output === 'string' ? result.output : '';
   const hasToolCalls = result.toolCalls && result.toolCalls.length > 0;
   const hasVfsSnapshot = result.vfsSnapshot && Object.keys(result.vfsSnapshot).length > 0;
+  const nodeCost = result.inputTokens != null && result.outputTokens != null
+    ? calculateCost(result.inputTokens, result.outputTokens, result.model)
+    : null;
 
   return (
     <>
@@ -33,7 +37,12 @@ export function NodeResultCard({ result }: { result: NodeResult }) {
                 <Badge variant="outline" className="text-xs">{result.latencyMs}ms</Badge>
               )}
               {result.tokensUsed !== undefined && (
-                <Badge variant="outline" className="text-xs">{result.tokensUsed} tokens</Badge>
+                <Badge variant="outline" className="text-xs" title={result.inputTokens != null ? `${result.inputTokens} in / ${result.outputTokens} out` : undefined}>
+                  {result.tokensUsed} tokens
+                </Badge>
+              )}
+              {nodeCost !== null && (
+                <Badge variant="outline" className="text-xs">{formatCost(nodeCost)}</Badge>
               )}
               {result.error && <Badge variant="destructive" className="text-xs">Error</Badge>}
             </div>

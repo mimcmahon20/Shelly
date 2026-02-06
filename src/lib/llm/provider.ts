@@ -10,7 +10,7 @@ const API_KEY_MAP: Record<string, string> = {
   'google-vertex': 'shelly-api-key-google-vertex',
 };
 
-export async function callLLMStream(request: LLMRequest): Promise<LLMResponse> {
+export async function callLLMStream(request: LLMRequest, onDelta?: (text: string) => void): Promise<LLMResponse> {
   const provider = request.provider || 'anthropic';
   const storageKey = API_KEY_MAP[provider] || 'shelly-api-key-anthropic';
   const apiKey = typeof window !== 'undefined' ? localStorage.getItem(storageKey) || '' : '';
@@ -35,6 +35,8 @@ export async function callLLMStream(request: LLMRequest): Promise<LLMResponse> {
   const decoder = new TextDecoder();
   let finalContent = '';
   let finalTokensUsed = 0;
+  let finalInputTokens = 0;
+  let finalOutputTokens = 0;
   let buffer = '';
 
   while (true) {
@@ -52,14 +54,19 @@ export async function callLLMStream(request: LLMRequest): Promise<LLMResponse> {
 
       const event = JSON.parse(json);
       if (event.type === 'error') throw new Error(event.error);
+      if (event.type === 'delta' && onDelta) {
+        onDelta(event.content);
+      }
       if (event.type === 'done') {
         finalContent = event.content;
         finalTokensUsed = event.tokensUsed;
+        finalInputTokens = event.inputTokens || 0;
+        finalOutputTokens = event.outputTokens || 0;
       }
     }
   }
 
-  return { content: finalContent, tokensUsed: finalTokensUsed };
+  return { content: finalContent, tokensUsed: finalTokensUsed, inputTokens: finalInputTokens, outputTokens: finalOutputTokens };
 }
 
 export async function callLLM(request: LLMRequest): Promise<LLMResponse> {
@@ -86,7 +93,8 @@ export async function callLLM(request: LLMRequest): Promise<LLMResponse> {
 
 export async function callLLMWithTools(
   request: LLMRequest & { vfs: VirtualFileSystem; maxToolIterations?: number },
-  onToolCall?: (trace: ToolCallTrace) => void
+  onToolCall?: (trace: ToolCallTrace) => void,
+  onDelta?: (text: string) => void
 ): Promise<LLMResponse> {
   const provider = request.provider || 'anthropic';
   const storageKey = API_KEY_MAP[provider] || 'shelly-api-key-anthropic';
@@ -115,6 +123,8 @@ export async function callLLMWithTools(
   const decoder = new TextDecoder();
   let finalContent = '';
   let finalTokensUsed = 0;
+  let finalInputTokens = 0;
+  let finalOutputTokens = 0;
   let finalToolCalls: ToolCallTrace[] = [];
   let finalVfs: VirtualFileSystem = {};
   let buffer = '';
@@ -134,12 +144,17 @@ export async function callLLMWithTools(
 
       const event = JSON.parse(json);
       if (event.type === 'error') throw new Error(event.error);
+      if (event.type === 'delta' && onDelta) {
+        onDelta(event.content);
+      }
       if (event.type === 'tool_call' && onToolCall) {
         onToolCall(event.trace);
       }
       if (event.type === 'done') {
         finalContent = event.content;
         finalTokensUsed = event.tokensUsed;
+        finalInputTokens = event.inputTokens || 0;
+        finalOutputTokens = event.outputTokens || 0;
         finalToolCalls = event.toolCalls || [];
         finalVfs = event.vfs || {};
       }
@@ -149,6 +164,8 @@ export async function callLLMWithTools(
   return {
     content: finalContent,
     tokensUsed: finalTokensUsed,
+    inputTokens: finalInputTokens,
+    outputTokens: finalOutputTokens,
     toolCalls: finalToolCalls,
     vfs: finalVfs,
   };

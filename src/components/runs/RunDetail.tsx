@@ -1,28 +1,45 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRunStore } from '@/stores/runStore';
 import { NodeResultCard } from './NodeResultCard';
+import { StreamingNodeCard } from './StreamingNodeCard';
 import { Badge } from '@/components/ui/badge';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+import { calculateCost, formatCost } from '@/lib/cost';
 
 export function RunDetail() {
   const run = useRunStore((s) => s.getCurrentRun());
+  const streamingNode = useRunStore((s) => s.streamingNode);
   const [vfsExpanded, setVfsExpanded] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (streamingNode && scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [streamingNode]);
 
   if (!run) return null;
 
   const totalTokens = run.nodeResults.reduce((sum, r) => sum + (r.tokensUsed || 0), 0);
   const totalLatency = run.nodeResults.reduce((sum, r) => sum + (r.latencyMs || 0), 0);
+  const totalCost = run.nodeResults.reduce((sum, r) => {
+    if (r.inputTokens != null && r.outputTokens != null) {
+      return sum + calculateCost(r.inputTokens, r.outputTokens, r.model);
+    }
+    return sum;
+  }, 0);
   const hasFinalVfs = run.finalVfs && Object.keys(run.finalVfs).length > 0;
 
   return (
-    <div className="space-y-4">
+    <div ref={scrollRef} className="space-y-4">
       <div className="flex items-center gap-2 flex-wrap">
         <Badge variant={run.status === 'completed' ? 'default' : run.status === 'failed' ? 'destructive' : 'secondary'}>
           {run.status}
         </Badge>
         <Badge variant="outline">{totalTokens} total tokens</Badge>
         <Badge variant="outline">{totalLatency}ms total</Badge>
+        {totalCost > 0 && <Badge variant="outline">{formatCost(totalCost)}</Badge>}
       </div>
 
       <div>
@@ -35,6 +52,9 @@ export function RunDetail() {
         {run.nodeResults.map((result, i) => (
           <NodeResultCard key={`${result.nodeId}-${i}`} result={result} />
         ))}
+        {streamingNode && run.status === 'running' && (
+          <StreamingNodeCard state={streamingNode} />
+        )}
       </div>
 
       {run.finalOutput && (

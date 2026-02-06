@@ -10,6 +10,22 @@ export interface ToolCallTrace {
   iteration: number;
 }
 
+export interface StreamingNodeState {
+  nodeId: string;
+  nodeType: NodeType;
+  nodeLabel?: string;
+  status: 'streaming' | 'tool_loop';
+  streamedText: string;
+  toolCalls: ToolCallTrace[];
+  startedAt: number;
+}
+
+export interface StreamCallbacks {
+  onDelta: (nodeId: string, text: string) => void;
+  onToolCall: (nodeId: string, trace: ToolCallTrace) => void;
+  onNodeStart: (nodeId: string, nodeType: NodeType, nodeLabel?: string) => void;
+}
+
 export interface RoutingRule {
   field: string;
   operator: 'equals' | 'contains' | 'gt' | 'lt';
@@ -64,6 +80,9 @@ export interface NodeResult {
   input: unknown;
   output: unknown;
   tokensUsed?: number;
+  inputTokens?: number;
+  outputTokens?: number;
+  model?: string;
   latencyMs?: number;
   error?: string;
   toolCalls?: ToolCallTrace[];
@@ -96,6 +115,8 @@ export interface LLMRequest {
 export interface LLMResponse {
   content: string;
   tokensUsed: number;
+  inputTokens: number;
+  outputTokens: number;
   toolCalls?: ToolCallTrace[];
   vfs?: VirtualFileSystem;
 }

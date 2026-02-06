@@ -37,9 +37,14 @@ export class OpenAIProvider implements LLMProvider {
       const toolCall = response.choices[0]?.message?.tool_calls?.[0];
       const content = toolCall && 'function' in toolCall ? toolCall.function.arguments : '';
 
+      const inputTokens = response.usage?.prompt_tokens || 0;
+      const outputTokens = response.usage?.completion_tokens || 0;
+
       return {
         content,
-        tokensUsed: (response.usage?.total_tokens || 0),
+        tokensUsed: response.usage?.total_tokens || 0,
+        inputTokens,
+        outputTokens,
       };
     }
 
@@ -51,9 +56,14 @@ export class OpenAIProvider implements LLMProvider {
       ],
     });
 
+    const inputTokens = response.usage?.prompt_tokens || 0;
+    const outputTokens = response.usage?.completion_tokens || 0;
+
     return {
       content: response.choices[0]?.message?.content || '',
-      tokensUsed: (response.usage?.total_tokens || 0),
+      tokensUsed: response.usage?.total_tokens || 0,
+      inputTokens,
+      outputTokens,
     };
   }
 }

@@ -6,6 +6,16 @@ Format: Versions are grouped by release. Each entry includes the date and a summ
 
 ---
 
+## v0.7.0 — 2026-02-05
+
+### Added
+- Real-time streaming in run drawer — live text, tool calls, and blinking cursor as the model responds
+- Streaming status card with spinner, elapsed timer, and auto-scroll during execution
+- Per-node and total run cost tracking based on API pricing (input/output token split)
+- Token breakdown tooltip on node result badges (hover to see input vs output)
+
+---
+
 ## v0.6.2 — 2026-02-05
 
 ### Added

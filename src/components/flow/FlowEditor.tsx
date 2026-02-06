@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { executeFlow } from '@/lib/engine';
 import { Play, Braces } from 'lucide-react';
-import type { Flow } from '@/lib/types';
+import type { Flow, StreamCallbacks } from '@/lib/types';
 
 function extractTemplateVariables(flow: Flow): string[] {
   const vars = new Set<string>();
@@ -36,7 +36,10 @@ export function FlowEditor() {
     flows,
   } = useFlowStore();
 
-  const { loadRuns, createRun, addNodeResult, completeRun, failRun, persistRun } = useRunStore();
+  const {
+    loadRuns, createRun, addNodeResult, completeRun, failRun, persistRun,
+    setStreamingNode, appendStreamDelta, addStreamingToolCall, clearStreamingNode,
+  } = useRunStore();
   const { loadVersions } = useVersionStore();
 
   const [userInput, setUserInput] = useState('');
@@ -80,21 +83,36 @@ export function FlowEditor() {
     const input = useStructured ? { ...structuredInput } : userInput.trim();
     const run = createRun(flow.id, input);
 
+    const streamCbs: StreamCallbacks = {
+      onNodeStart: (nodeId, nodeType, nodeLabel) => {
+        setStreamingNode(nodeId, nodeType, nodeLabel);
+      },
+      onDelta: (nodeId, text) => {
+        appendStreamDelta(nodeId, text);
+      },
+      onToolCall: (nodeId, trace) => {
+        addStreamingToolCall(nodeId, trace);
+      },
+    };
+
     try {
       const { finalOutput, finalVfs } = await executeFlow(flow, input, (result) => {
+        clearStreamingNode();
         addNodeResult(run.id, result);
-      });
+      }, streamCbs);
       completeRun(run.id, finalOutput, finalVfs);
       if (finalVfs && Object.keys(finalVfs).length > 0) {
         updateFlowVfs(finalVfs);
       }
     } catch (error) {
+      clearStreamingNode();
       failRun(run.id, error instanceof Error ? error.message : 'Unknown error');
     } finally {
+      clearStreamingNode();
       setIsRunning(false);
       await persistRun(run.id);
     }
-  }, [flow, canRun, useStructured, structuredInput, userInput, createRun, addNodeResult, completeRun, failRun, persistRun, updateFlowVfs]);
+  }, [flow, canRun, useStructured, structuredInput, userInput, createRun, addNodeResult, completeRun, failRun, persistRun, updateFlowVfs, setStreamingNode, appendStreamDelta, addStreamingToolCall, clearStreamingNode]);
 
   return (
     <div className="flex-1 flex overflow-hidden min-h-0">

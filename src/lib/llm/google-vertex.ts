@@ -34,11 +34,10 @@ export class GoogleVertexProvider implements LLMProvider {
       const response = await generativeModel.generateContent(req);
       const result = response.response;
       const content = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      const tokensUsed =
-        (result.usageMetadata?.promptTokenCount || 0) +
-        (result.usageMetadata?.candidatesTokenCount || 0);
+      const inputTokens = result.usageMetadata?.promptTokenCount || 0;
+      const outputTokens = result.usageMetadata?.candidatesTokenCount || 0;
 
-      return { content, tokensUsed };
+      return { content, tokensUsed: inputTokens + outputTokens, inputTokens, outputTokens };
     }
 
     const req: GenerateContentRequest = {
@@ -49,10 +48,9 @@ export class GoogleVertexProvider implements LLMProvider {
     const response = await generativeModel.generateContent(req);
     const result = response.response;
     const content = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    const tokensUsed =
-      (result.usageMetadata?.promptTokenCount || 0) +
-      (result.usageMetadata?.candidatesTokenCount || 0);
+    const inputTokens = result.usageMetadata?.promptTokenCount || 0;
+    const outputTokens = result.usageMetadata?.candidatesTokenCount || 0;
 
-    return { content, tokensUsed };
+    return { content, tokensUsed: inputTokens + outputTokens, inputTokens, outputTokens };
   }
 }

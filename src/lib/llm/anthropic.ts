@@ -32,10 +32,14 @@ export class AnthropicProvider implements LLMProvider {
 
       const toolBlock = response.content.find((b) => b.type === 'tool_use');
       const output = toolBlock && 'input' in toolBlock ? JSON.stringify(toolBlock.input) : '';
+      const inputTokens = response.usage?.input_tokens || 0;
+      const outputTokens = response.usage?.output_tokens || 0;
 
       return {
         content: output,
-        tokensUsed: (response.usage?.input_tokens || 0) + (response.usage?.output_tokens || 0),
+        tokensUsed: inputTokens + outputTokens,
+        inputTokens,
+        outputTokens,
       };
     }
 
@@ -48,17 +52,21 @@ export class AnthropicProvider implements LLMProvider {
 
     const textBlock = response.content.find((b) => b.type === 'text');
     const content = textBlock && 'text' in textBlock ? textBlock.text : '';
+    const inputTokens = response.usage?.input_tokens || 0;
+    const outputTokens = response.usage?.output_tokens || 0;
 
     return {
       content,
-      tokensUsed: (response.usage?.input_tokens || 0) + (response.usage?.output_tokens || 0),
+      tokensUsed: inputTokens + outputTokens,
+      inputTokens,
+      outputTokens,
     };
   }
 
   async *chatStream(
     request: LLMRequest,
     apiKey: string
-  ): AsyncGenerator<{ type: 'delta'; content: string } | { type: 'done'; content: string; tokensUsed: number }> {
+  ): AsyncGenerator<{ type: 'delta'; content: string } | { type: 'done'; content: string; tokensUsed: number; inputTokens: number; outputTokens: number }> {
     const client = new Anthropic({ apiKey });
 
     if (request.outputSchema) {
@@ -94,13 +102,15 @@ export class AnthropicProvider implements LLMProvider {
       }
 
       const finalMessage = await stream.finalMessage();
-      const tokensUsed = (finalMessage.usage?.input_tokens || 0) + (finalMessage.usage?.output_tokens || 0);
+      const inputTokens = finalMessage.usage?.input_tokens || 0;
+      const outputTokens = finalMessage.usage?.output_tokens || 0;
+      const tokensUsed = inputTokens + outputTokens;
 
       // Re-extract from final message for accuracy
       const toolBlock = finalMessage.content.find((b) => b.type === 'tool_use');
       const output = toolBlock && 'input' in toolBlock ? JSON.stringify(toolBlock.input) : jsonContent;
 
-      yield { type: 'done', content: output, tokensUsed };
+      yield { type: 'done', content: output, tokensUsed, inputTokens, outputTokens };
       return;
     }
 
@@ -121,9 +131,11 @@ export class AnthropicProvider implements LLMProvider {
     }
 
     const finalMessage = await stream.finalMessage();
-    const tokensUsed = (finalMessage.usage?.input_tokens || 0) + (finalMessage.usage?.output_tokens || 0);
+    const inputTokens = finalMessage.usage?.input_tokens || 0;
+    const outputTokens = finalMessage.usage?.output_tokens || 0;
+    const tokensUsed = inputTokens + outputTokens;
 
-    yield { type: 'done', content: fullContent, tokensUsed };
+    yield { type: 'done', content: fullContent, tokensUsed, inputTokens, outputTokens };
   }
 
   async *chatWithTools(
@@ -132,13 +144,15 @@ export class AnthropicProvider implements LLMProvider {
   ): AsyncGenerator<
     | { type: 'tool_call'; trace: ToolCallTrace }
     | { type: 'delta'; content: string }
-    | { type: 'done'; content: string; tokensUsed: number; toolCalls: ToolCallTrace[]; vfs: VirtualFileSystem }
+    | { type: 'done'; content: string; tokensUsed: number; inputTokens: number; outputTokens: number; toolCalls: ToolCallTrace[]; vfs: VirtualFileSystem }
   > {
     const client = new Anthropic({ apiKey });
     const maxIterations = request.maxToolIterations || 10;
     let vfs: VirtualFileSystem = request.vfs ? { ...request.vfs } : {};
     const allTraces: ToolCallTrace[] = [];
     let totalTokens = 0;
+    let totalInputTokens = 0;
+    let totalOutputTokens = 0;
     let iteration = 0;
 
     const messages: Anthropic.Messages.MessageParam[] = [
@@ -172,7 +186,11 @@ export class AnthropicProvider implements LLMProvider {
       }
 
       const response = await stream.finalMessage();
-      totalTokens += (response.usage?.input_tokens || 0) + (response.usage?.output_tokens || 0);
+      const iterInputTokens = response.usage?.input_tokens || 0;
+      const iterOutputTokens = response.usage?.output_tokens || 0;
+      totalInputTokens += iterInputTokens;
+      totalOutputTokens += iterOutputTokens;
+      totalTokens += iterInputTokens + iterOutputTokens;
 
       const hasToolUse = response.content.some((b) => b.type === 'tool_use');
 
@@ -180,7 +198,7 @@ export class AnthropicProvider implements LLMProvider {
         // Use streamed text if available, otherwise extract from final message
         const textBlock = response.content.find((b) => b.type === 'text');
         const content = textBlock && 'text' in textBlock ? textBlock.text : iterationText;
-        yield { type: 'done', content, tokensUsed: totalTokens, toolCalls: allTraces, vfs };
+        yield { type: 'done', content, tokensUsed: totalTokens, inputTokens: totalInputTokens, outputTokens: totalOutputTokens, toolCalls: allTraces, vfs };
         return;
       }
 

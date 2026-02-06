@@ -257,6 +257,14 @@ export function HowToModal({ open, onOpenChange }: HowToModalProps) {
             <div className="space-y-4 text-muted-foreground">
 
               <div>
+                <h4 className="font-medium text-foreground text-sm">v0.7.1 — 2026-02-05</h4>
+                <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
+                  <li>&quot;Smart Game Editor&quot; example flow with 3-way routing: generate, easy edit (Sonnet), hard edit (Opus)</li>
+                  <li>Easy edits routed to Sonnet for speed; hard edits routed to Opus for quality</li>
+                </ul>
+              </div>
+
+              <div>
                 <h4 className="font-medium text-foreground text-sm">v0.7.0 — 2026-02-05</h4>
                 <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
                   <li>Real-time streaming in run drawer — live text, tool calls, and blinking cursor</li>

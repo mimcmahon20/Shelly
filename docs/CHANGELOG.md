@@ -6,6 +6,15 @@ Format: Versions are grouped by release. Each entry includes the date and a summ
 
 ---
 
+## v0.7.1 — 2026-02-05
+
+### Added
+- "Smart Game Editor" example flow with 3-way routing: generate, easy edit (Sonnet 4.5), hard edit (Opus 4.6)
+- Easy edits (cosmetic changes) routed to Sonnet for speed; hard edits (structural changes) routed to Opus for quality
+- DB migration v5 auto-inserts the new flow for existing users
+
+---
+
 ## v0.7.0 — 2026-02-05
 
 ### Added

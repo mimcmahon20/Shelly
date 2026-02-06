@@ -205,3 +205,154 @@ export const EXAMPLE_VFS_FLOW: Flow = {
   createdAt: '2025-01-01T00:00:00.000Z',
   updatedAt: '2025-01-01T00:00:00.000Z',
 };
+
+export const EXAMPLE_DIFFICULTY_FLOW: Flow = {
+  id: 'example-difficulty-router',
+  name: 'Smart Game Editor',
+  nodes: [
+    {
+      id: 'user-input-1',
+      type: 'user-input',
+      position: { x: 250, y: 0 },
+      data: { label: 'Grade & Topic' },
+    },
+    {
+      id: 'classifier-1',
+      type: 'structured-output',
+      position: { x: 250, y: 150 },
+      data: {
+        label: 'Classifier',
+        provider: 'anthropic',
+        model: 'claude-opus-4-6',
+        systemPrompt:
+          "Classify the user's educational game request into one of three categories.\n\n" +
+          "- 'generate': The user wants a brand-new game built from scratch (keywords: 'build', 'create', 'make', 'design a game about').\n" +
+          "- 'edit_easy': The user wants a simple, cosmetic change to an existing game — things like colors, text, font sizes, spacing, wording, or other surface-level tweaks (keywords: 'change the color', 'make it bigger', 'rename', 'change the text', 'update the font').\n" +
+          "- 'edit_difficult': The user wants a complex, structural change — new features, new game mechanics, layout overhauls, adding multiplayer, new screens, or significant logic changes (keywords: 'add a feature', 'add multiplayer', 'new game mode', 'redesign', 'overhaul').\n\n" +
+          "When in doubt between easy and difficult, lean toward 'edit_difficult'.",
+        humanMessageTemplate: '{{input}}',
+        outputSchema:
+          '{"type":"object","properties":{"action":{"type":"string","description":"One of: generate, edit_easy, edit_difficult"}},"required":["action"]}',
+      },
+    },
+    {
+      id: 'router-1',
+      type: 'router',
+      position: { x: 250, y: 300 },
+      data: {
+        label: 'Route Action',
+        routingRules: [
+          {
+            field: 'action',
+            operator: 'equals',
+            value: 'generate',
+            targetNodeId: 'agent-planner',
+          },
+          {
+            field: 'action',
+            operator: 'equals',
+            value: 'edit_difficult',
+            targetNodeId: 'agent-editor-hard',
+          },
+        ],
+        defaultTargetNodeId: 'agent-editor-easy',
+      },
+    },
+    {
+      id: 'agent-planner',
+      type: 'agent',
+      position: { x: 0, y: 475 },
+      data: {
+        label: 'Game Planner',
+        provider: 'anthropic',
+        model: 'claude-haiku-4-5-20251001',
+        systemPrompt:
+          'You are a game visual designer for educational games. Given a grade level and topic, produce a concise design brief. Include: 1) Color palette — 3-4 specific hex colors. Use bold, flat, saturated colors. NO gradients. NO pastels. 2) Typography — font style and size hierarchy 3) Layout — how the game screen is organized (header, game area, score display, controls) 4) Visual theme fitting the grade level. Keep the brief short and actionable. Do NOT use emojis anywhere.',
+        humanMessageTemplate: 'Design an educational game for: {{user-input-1}}',
+      },
+    },
+    {
+      id: 'agent-generator',
+      type: 'agent',
+      position: { x: 0, y: 650 },
+      data: {
+        label: 'Game Generator',
+        provider: 'anthropic',
+        model: 'claude-opus-4-6',
+        toolsEnabled: true,
+        maxToolIterations: 15,
+        systemPrompt:
+          'You are an expert game developer who builds interactive educational games using a virtual filesystem.\n\nWorkflow:\n1. Call list_files to see existing files\n2. Call view on each file\n3. Use edit and create_file to build the game\n\nGame requirements (non-negotiable):\n- Start screen with game title, brief instructions, and a Start button\n- End screen showing final score and a Play Again button\n- Scoring system visible during gameplay\n- Time-based element (countdown timer, timed rounds, or speed bonus)\n- Educational content appropriate for the specified grade level\n- At least 8-10 questions/challenges per game session\n\nDesign rules:\n- NO emojis anywhere in the game\n- NO CSS gradients — use flat, solid background colors\n- Bold, clean typography with clear visual hierarchy\n- Follow the design brief\'s color palette exactly\n\nTechnical rules:\n- Split code across index.html, style.css, script.js\n- HTML references style.css via <link> and script.js via <script>\n- Vanilla JavaScript only, no external dependencies\n- Mobile-responsive layout',
+        humanMessageTemplate:
+          'Build an educational game for: {{user-input-1}}\n\nFollow this design brief:\n{{agent-planner}}',
+      },
+    },
+    {
+      id: 'agent-editor-easy',
+      type: 'agent',
+      position: { x: 550, y: 475 },
+      data: {
+        label: 'Easy Editor (Sonnet)',
+        provider: 'anthropic',
+        model: 'claude-sonnet-4-5-20250929',
+        toolsEnabled: true,
+        maxToolIterations: 8,
+        systemPrompt:
+          'You are a quick-fix game editor for simple, cosmetic changes to educational games in a virtual filesystem.\n\nYou handle easy edits: color changes, text updates, font sizing, spacing, wording tweaks, and other surface-level modifications.\n\nWorkflow:\n1. Call list_files, then view each file to understand the current game\n2. Make targeted, minimal edits based on the user\'s request\n\nRules:\n- Make surgical edits only — do NOT rewrite files from scratch\n- Only change what the user specifically asked for\n- Preserve all game functionality and structure\n- Keep changes small and focused',
+        humanMessageTemplate:
+          'The user wants a quick cosmetic change: {{user-input-1}}\n\nReview the game files and make the requested changes.',
+      },
+    },
+    {
+      id: 'agent-editor-hard',
+      type: 'agent',
+      position: { x: 350, y: 475 },
+      data: {
+        label: 'Hard Editor (Opus)',
+        provider: 'anthropic',
+        model: 'claude-opus-4-6',
+        toolsEnabled: true,
+        maxToolIterations: 12,
+        systemPrompt:
+          'You are a senior game developer who handles complex, structural edits to educational games in a virtual filesystem.\n\nYou handle difficult edits: adding new features, new game mechanics, layout overhauls, multiplayer modes, new screens, and significant logic changes.\n\nWorkflow:\n1. Call list_files, then view each file to understand the current game\n2. Plan your changes carefully before editing\n3. Make the structural changes the user requested\n\nCore requirements you must preserve:\n- Start screen with title, instructions, Start button\n- End screen with score and Play Again button\n- Scoring system visible during gameplay\n- Time-based element\n- No emojis, no gradients\n\nRules:\n- Think through the architecture before making changes\n- Make clean, well-structured edits\n- Maintain all core game requirements above\n- Only change what is necessary to fulfill the user\'s request',
+        humanMessageTemplate:
+          'The user wants a complex structural change: {{user-input-1}}\n\nReview the game files and make the requested changes.',
+      },
+    },
+    {
+      id: 'html-preview-1',
+      type: 'html-renderer',
+      position: { x: 250, y: 825 },
+      data: { label: 'Game Preview' },
+    },
+    {
+      id: 'output-1',
+      type: 'output',
+      position: { x: 250, y: 1000 },
+      data: { label: 'Output' },
+    },
+  ],
+  edges: [
+    // Flow control: user-input → classifier → router
+    { id: 'e-input-classifier', source: 'user-input-1', target: 'classifier-1' },
+    { id: 'e-classifier-router', source: 'classifier-1', target: 'router-1' },
+    // Router targets
+    { id: 'e-router-planner', source: 'router-1', target: 'agent-planner' },
+    { id: 'e-router-editor-easy', source: 'router-1', target: 'agent-editor-easy' },
+    { id: 'e-router-editor-hard', source: 'router-1', target: 'agent-editor-hard' },
+    // Data edges: user input forwarded to agents
+    { id: 'e-input-planner', source: 'user-input-1', target: 'agent-planner' },
+    { id: 'e-planner-generator', source: 'agent-planner', target: 'agent-generator' },
+    { id: 'e-input-generator', source: 'user-input-1', target: 'agent-generator' },
+    { id: 'e-input-editor-easy', source: 'user-input-1', target: 'agent-editor-easy' },
+    { id: 'e-input-editor-hard', source: 'user-input-1', target: 'agent-editor-hard' },
+    // All paths converge on preview → output
+    { id: 'e-generator-preview', source: 'agent-generator', target: 'html-preview-1' },
+    { id: 'e-editor-easy-preview', source: 'agent-editor-easy', target: 'html-preview-1' },
+    { id: 'e-editor-hard-preview', source: 'agent-editor-hard', target: 'html-preview-1' },
+    { id: 'e-preview-output', source: 'html-preview-1', target: 'output-1' },
+  ],
+  initialVfs: SEED_VFS,
+  createdAt: '2025-01-01T00:00:00.000Z',
+  updatedAt: '2025-01-01T00:00:00.000Z',
+};

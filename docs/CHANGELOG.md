@@ -6,6 +6,15 @@ Format: Versions are grouped by release. Each entry includes the date and a summ
 
 ---
 
+## v0.7.3 — 2026-02-09
+
+### Added
+- Export dropdown with three options: JSON export (existing), markdown guide export, and copy-to-clipboard
+- Flow implementation prompt generator (`src/lib/flowPrompt.ts`) — produces a structured markdown document with schema reference, execution walkthrough, and embedded flow JSON
+- shadcn/ui dropdown menu component
+
+---
+
 ## v0.7.2 — 2026-02-05
 
 ### Fixed

@@ -14,10 +14,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Settings, Trash2, Download, Upload, RotateCcw, X, HelpCircle, Copy } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Plus, Settings, Trash2, Download, Upload, RotateCcw, X, HelpCircle, Copy, ChevronDown, FileText, FileCode, Clipboard } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { HowToModal } from '@/components/HowToModal';
 import { resetDatabase } from '@/lib/db';
+import { generateFlowPrompt } from '@/lib/flowPrompt';
 
 export default function Home() {
   const {
@@ -34,6 +36,7 @@ export default function Home() {
   const [newFlowName, setNewFlowName] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [howToOpen, setHowToOpen] = useState(false);
+  const [clipboardCopied, setClipboardCopied] = useState(false);
 
   useEffect(() => {
     loadFlows();
@@ -80,6 +83,28 @@ export default function Home() {
       }
     };
     input.click();
+  };
+
+  const handleExportGuide = () => {
+    const flow = getCurrentFlow();
+    if (!flow) return;
+    const markdown = generateFlowPrompt(flow);
+    const blob = new Blob([markdown], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${flow.name}_guide.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCopyPrompt = async () => {
+    const flow = getCurrentFlow();
+    if (!flow) return;
+    const markdown = generateFlowPrompt(flow);
+    await navigator.clipboard.writeText(markdown);
+    setClipboardCopied(true);
+    setTimeout(() => setClipboardCopied(false), 2000);
   };
 
   return (
@@ -144,9 +169,24 @@ export default function Home() {
               <Button variant="outline" size="sm" onClick={() => duplicateFlow(currentFlowId)}>
                 <Copy className="h-3 w-3 mr-1" /> Duplicate
               </Button>
-              <Button variant="outline" size="sm" onClick={handleExportFlow}>
-                <Download className="h-3 w-3 mr-1" /> Export
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Download className="h-3 w-3 mr-1" /> Export <ChevronDown className="h-3 w-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleExportFlow}>
+                    <FileCode className="h-4 w-4 mr-2" /> Export Flow (JSON)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleExportGuide}>
+                    <FileText className="h-4 w-4 mr-2" /> Export with Guide
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleCopyPrompt}>
+                    <Clipboard className="h-4 w-4 mr-2" /> {clipboardCopied ? 'Copied!' : 'Copy Implementation Prompt'}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button variant="outline" size="sm" onClick={handleImportFlow}>
                 <Upload className="h-3 w-3 mr-1" /> Import
               </Button>

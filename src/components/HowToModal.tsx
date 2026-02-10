@@ -258,6 +258,14 @@ export function HowToModal({ open, onOpenChange }: HowToModalProps) {
             <div className="space-y-4 text-muted-foreground">
 
               <div>
+                <h4 className="font-medium text-foreground text-sm">v0.7.3 — 2026-02-09</h4>
+                <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
+                  <li>Export dropdown with JSON, markdown guide, and copy-to-clipboard options</li>
+                  <li>Flow implementation prompt generator for reimplementing flows in any language</li>
+                </ul>
+              </div>
+
+              <div>
                 <h4 className="font-medium text-foreground text-sm">v0.7.2 — 2026-02-05</h4>
                 <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
                   <li>Flow versions now snapshot and restore VFS files</li>

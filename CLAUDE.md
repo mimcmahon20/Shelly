@@ -54,6 +54,7 @@ Token usage is split into `inputTokens`/`outputTokens` on `LLMResponse` and `Nod
 ### Key Files
 
 - `src/lib/engine.ts` — flow execution engine, node processing logic, VFS threading, `StreamCallbacks` wiring
+- `src/lib/flowPrompt.ts` — flow-to-markdown prompt generator for export (`generateFlowPrompt()` + graph traversal helpers)
 - `src/lib/cost.ts` — model pricing map + `calculateCost()`/`formatCost()` utilities
 - `src/lib/vfs.ts` — virtual filesystem tool execution + Anthropic tool definitions
 - `src/lib/llm/provider.ts` — LLM provider interface + `callLLMWithTools()` client function + `onDelta` callbacks

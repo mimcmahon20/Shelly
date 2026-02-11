@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { RATING_DIMENSIONS } from '@/lib/types';
 import type { RunRating, RatingDimension } from '@/lib/types';
 import { ChevronLeft, ChevronRight, X, Check } from 'lucide-react';
+import { ViewportPreview } from '@/components/shared/ViewportPreview';
 
 export function RatingOverlay() {
   const { ratingRunIds, ratingIndex, setRatingIndex, exitRatingMode, batchRuns, saveRating, ratings } = useTestStore();
@@ -15,6 +16,7 @@ export function RatingOverlay() {
   });
   const [notes, setNotes] = useState('');
   const [ratingId, setRatingId] = useState<string | null>(null);
+  const [inputExpanded, setInputExpanded] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const dirtyRef = useRef(false);
 
@@ -35,6 +37,7 @@ export function RatingOverlay() {
       setRatingId(null);
     }
     dirtyRef.current = false;
+    setInputExpanded(false);
   }, [currentRunId, ratings]);
 
   // Auto-save debounced
@@ -102,17 +105,19 @@ export function RatingOverlay() {
       <div className="flex-1 flex overflow-hidden">
         {/* Left: output preview */}
         <div className="flex-1 overflow-auto p-4 border-r">
-          <div className="text-xs text-muted-foreground mb-2">
-            Input: {currentRun ? (typeof currentRun.userInput === 'object'
-              ? Object.entries(currentRun.userInput).map(([k, v]) => `${k}: ${v}`).join(', ')
-              : currentRun.userInput) : ''}
+          <div
+            className="text-xs text-muted-foreground mb-2 cursor-pointer hover:text-foreground transition-colors"
+            onClick={() => setInputExpanded((v) => !v)}
+          >
+            <span className="font-medium text-foreground/70">Input:</span>{' '}
+            <span className={inputExpanded ? '' : 'line-clamp-2'}>
+              {currentRun ? (typeof currentRun.userInput === 'object'
+                ? Object.entries(currentRun.userInput).map(([k, v]) => `${k}: ${v}`).join(', ')
+                : currentRun.userInput) : ''}
+            </span>
           </div>
           {isHtml ? (
-            <iframe
-              srcDoc={currentRun!.finalOutput}
-              className="w-full h-[calc(100%-2rem)] border rounded"
-              sandbox="allow-scripts"
-            />
+            <ViewportPreview html={currentRun!.finalOutput} className="h-[calc(100%-2rem)]" />
           ) : (
             <pre className="text-sm whitespace-pre-wrap">{currentRun?.finalOutput}</pre>
           )}

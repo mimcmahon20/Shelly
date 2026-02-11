@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import type { Run } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Star } from 'lucide-react';
+import { ViewportPreview } from '@/components/shared/ViewportPreview';
 
 export function BatchResults() {
   const { batches, batchRuns, loadBatchRuns, setRatingMode, loadBatches } = useTestStore();
@@ -128,11 +129,7 @@ export function BatchResults() {
               <span className="text-sm font-medium">HTML Preview</span>
               <Button variant="ghost" size="sm" onClick={() => setPreviewHtml(null)}>Close</Button>
             </div>
-            <iframe
-              srcDoc={previewHtml}
-              className="flex-1 w-full border-0"
-              sandbox="allow-scripts"
-            />
+            <ViewportPreview html={previewHtml} className="flex-1 min-h-0 px-3 pb-3" />
           </div>
         </div>
       )}

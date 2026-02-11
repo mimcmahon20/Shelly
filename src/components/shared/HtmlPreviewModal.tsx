@@ -1,5 +1,6 @@
 'use client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ViewportPreview } from '@/components/shared/ViewportPreview';
 
 interface HtmlPreviewModalProps {
   open: boolean;
@@ -16,12 +17,7 @@ export function HtmlPreviewModal({ open, onOpenChange, html, title }: HtmlPrevie
           <DialogTitle>{title || 'HTML Preview'}</DialogTitle>
         </DialogHeader>
         <div className="flex-1 px-6 pb-6 min-h-0">
-          <iframe
-            srcDoc={html}
-            sandbox="allow-scripts"
-            className="w-full h-full border rounded-md bg-white"
-            title="HTML Preview"
-          />
+          <ViewportPreview html={html} className="h-full" />
         </div>
       </DialogContent>
     </Dialog>

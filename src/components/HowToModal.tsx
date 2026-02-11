@@ -258,6 +258,16 @@ export function HowToModal({ open, onOpenChange }: HowToModalProps) {
             <div className="space-y-4 text-muted-foreground">
 
               <div>
+                <h4 className="font-medium text-foreground text-sm">v0.7.4 — 2026-02-10</h4>
+                <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
+                  <li>Viewport preview with Mobile, Tablet, and Laptop toggle buttons</li>
+                  <li>Device-accurate iframe rendering with CSS media query support</li>
+                  <li>Integrated into rating overlay, batch results, and HTML preview modal</li>
+                  <li>Expandable user input display in rating overlay (click to expand)</li>
+                </ul>
+              </div>
+
+              <div>
                 <h4 className="font-medium text-foreground text-sm">v0.7.3 — 2026-02-09</h4>
                 <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
                   <li>Export dropdown with JSON, markdown guide, and copy-to-clipboard options</li>

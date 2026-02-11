@@ -6,6 +6,16 @@ Format: Versions are grouped by release. Each entry includes the date and a summ
 
 ---
 
+## v0.7.4 — 2026-02-10
+
+### Added
+- Viewport preview component with Mobile (375x667), Tablet (768x1024), and Laptop (1366x768) toggle buttons
+- Device-accurate iframe rendering with CSS media query support via transform scaling
+- Integrated viewport preview into rating overlay, batch results modal, and HTML preview modal
+- Expandable user input display in rating overlay (line-clamped, click to expand)
+
+---
+
 ## v0.7.3 — 2026-02-09
 
 ### Added

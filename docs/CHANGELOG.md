@@ -6,6 +6,19 @@ Format: Versions are grouped by release. Each entry includes the date and a summ
 
 ---
 
+## v0.8.0 — 2026-02-10
+
+### Added
+- Collapsible left sidebar for flow management (create, delete, duplicate, import, export)
+- Flow list with active flow highlighting and scrollable area
+- Sidebar collapse state persisted in localStorage
+
+### Changed
+- Moved all flow management controls from header to left sidebar
+- Slimmed header down to logo, help, theme toggle, and settings only
+
+---
+
 ## v0.7.4 — 2026-02-10
 
 ### Added

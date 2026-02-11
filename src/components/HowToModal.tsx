@@ -52,7 +52,7 @@ export function HowToModal({ open, onOpenChange }: HowToModalProps) {
               </p>
               <p>
                 <StepNumber n={2} />
-                Click <InlineIcon icon={Plus} /> <strong>New</strong> to create a flow, then select it from the dropdown.
+                Click <InlineIcon icon={Plus} /> <strong>New Flow</strong> in the left sidebar to create a flow, then select it from the list.
               </p>
             </div>
           </section>
@@ -256,6 +256,14 @@ export function HowToModal({ open, onOpenChange }: HowToModalProps) {
           <section>
             <h3 className="font-semibold text-base mb-2">Changelog</h3>
             <div className="space-y-4 text-muted-foreground">
+
+              <div>
+                <h4 className="font-medium text-foreground text-sm">v0.8.0 — 2026-02-10</h4>
+                <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
+                  <li>Collapsible left sidebar for flow management (create, delete, duplicate, import, export)</li>
+                  <li>Moved flow controls from header to sidebar; header slimmed to logo + global actions</li>
+                </ul>
+              </div>
 
               <div>
                 <h4 className="font-medium text-foreground text-sm">v0.7.4 — 2026-02-10</h4>

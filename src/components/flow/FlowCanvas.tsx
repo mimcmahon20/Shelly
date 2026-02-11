@@ -196,7 +196,7 @@ export function FlowCanvas() {
   if (!currentFlowId) {
     return (
       <div className="flex h-full items-center justify-center text-muted-foreground">
-        Select or create a flow to get started
+        Select or create a flow from the sidebar to get started
       </div>
     );
   }

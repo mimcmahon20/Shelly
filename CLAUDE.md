@@ -63,8 +63,13 @@ The Test tab provides batch execution and rating for evaluating flow output qual
 
 HTML outputs use `ViewportPreview` (`src/components/shared/ViewportPreview.tsx`) which renders iframes at actual device resolutions (Mobile 375x667, Tablet 768x1024, Laptop 1366x768) with `transform: scale()` so CSS media queries fire correctly.
 
+### Layout
+
+The page has a slim header (logo + global actions) and a horizontal flex body. The left side is a collapsible `FlowSidebar` (`src/components/flow/FlowSidebar.tsx`) for flow management (list, create, delete, duplicate, import, export). Collapse state is persisted in `localStorage`. The right side is `Tabs` (Build/Test/Results). The Build tab contains `FlowEditor` which has its own right sidebar for node config, versions, files, and runs.
+
 ### Key Files
 
+- `src/components/flow/FlowSidebar.tsx` — collapsible left sidebar with flow list and management actions
 - `src/lib/engine.ts` — flow execution engine, node processing logic, VFS threading, `StreamCallbacks` wiring
 - `src/lib/flowPrompt.ts` — flow-to-markdown prompt generator for export (`generateFlowPrompt()` + graph traversal helpers)
 - `src/lib/cost.ts` — model pricing map + `calculateCost()`/`formatCost()` utilities

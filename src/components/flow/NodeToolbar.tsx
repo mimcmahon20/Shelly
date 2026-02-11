@@ -18,8 +18,7 @@ export function NodeToolbar() {
   };
 
   return (
-    <div className="flex gap-2 p-2 border-b bg-card">
-      <span className="text-xs text-muted-foreground self-center mr-2">Drag to add:</span>
+    <div className="flex flex-wrap gap-2 p-2 border-b bg-card">
       {nodeTypeItems.map((item) => (
         <div
           key={item.type}

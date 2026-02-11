@@ -128,11 +128,14 @@ export function FlowSidebar() {
         )}
       >
         {/* Toggle button */}
-        <div className="flex items-center h-10 px-2 shrink-0">
+        <div className="flex items-center justify-between h-10 px-2 shrink-0">
+          {!collapsed && (
+            <span className="text-sm font-medium text-muted-foreground">Flows</span>
+          )}
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 p-0 ml-auto"
             onClick={() => setCollapsed(!collapsed)}
           >
             {collapsed ? (
@@ -141,9 +144,6 @@ export function FlowSidebar() {
               <PanelLeftClose className="h-4 w-4" />
             )}
           </Button>
-          {!collapsed && (
-            <span className="ml-2 text-sm font-medium text-muted-foreground">Flows</span>
-          )}
         </div>
 
         {!collapsed && (

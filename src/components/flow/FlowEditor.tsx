@@ -116,11 +116,11 @@ export function FlowEditor() {
 
   return (
     <div className="flex-1 flex overflow-hidden min-h-0">
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         {currentFlowId && <NodeToolbar />}
 
         {currentFlowId && (
-          <div className="flex items-center gap-2 px-4 py-2 border-b bg-muted/30">
+          <div className="flex items-center gap-2 px-4 py-2 border-b bg-muted/30 min-w-0">
             {useStructured ? (
               <div className="flex-1 flex items-center gap-2 flex-wrap">
                 {templateVars.map((v) => (

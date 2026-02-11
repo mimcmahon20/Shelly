@@ -26,7 +26,7 @@ export function SidebarTabs() {
   }, [selectedNodeId]);
 
   return (
-    <div className="w-80 border-l flex flex-col">
+    <div className="w-72 shrink-0 border-l flex flex-col">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 min-h-0">
         <TabsList className="w-full justify-start rounded-none border-b bg-transparent px-2 shrink-0">
           <TabsTrigger value="runs" className="text-xs">Runs</TabsTrigger>

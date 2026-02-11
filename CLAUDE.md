@@ -35,9 +35,10 @@ Templates use `{{variable}}` interpolation with dot notation for nested access. 
 
 ### State Management
 
-Two Zustand stores with IndexedDB persistence:
+Three Zustand stores with IndexedDB persistence:
 - **flowStore** (`src/stores/flowStore.ts`) — flows, nodes, edges, selection state
 - **runStore** (`src/stores/runStore.ts`) — run history, per-node results
+- **testStore** (`src/stores/testStore.ts`) — input sets, batches, batch runs, ratings, compare state
 
 API key is stored in localStorage.
 
@@ -50,6 +51,17 @@ Tool-enabled agent nodes operate on a `VirtualFileSystem` (`Record<string, strin
 SSE events flow from `chatWithTools()`/`chatStream()` → API route → `callLLMStream()`/`callLLMWithTools()` → engine `StreamCallbacks` → `runStore.streamingNode` → `StreamingNodeCard`. Delta events carry text chunks; tool_call events carry `ToolCallTrace`. The `streamingNode` state is ephemeral (not persisted to IndexedDB).
 
 Token usage is split into `inputTokens`/`outputTokens` on `LLMResponse` and `NodeResult`. Cost is calculated via `src/lib/cost.ts` which maps model IDs to per-million-token pricing. The `model` field on `NodeResult` enables accurate cost computation per node.
+
+### Testing / Eval System
+
+The Test tab provides batch execution and rating for evaluating flow output quality:
+- **Input sets** — reusable lists of test inputs (simple text or structured key-value rows), can import from CSV/TXT
+- **Batches** — run an input set against one or more flows (3 concurrent runs), tracked with progress bar
+- **Rating overlay** (`src/components/results/RatingOverlay.tsx`) — full-screen review mode with 5-dimension scoring (usability, responsiveness, design, quality, accuracy) and auto-save
+- **Batch results** (`src/components/results/BatchResults.tsx`) — tabular view of completed runs with inline HTML preview modal
+- **Compare** (`src/components/results/BatchCompare.tsx`) — side-by-side batch comparison via bar chart, radar, or table
+
+HTML outputs use `ViewportPreview` (`src/components/shared/ViewportPreview.tsx`) which renders iframes at actual device resolutions (Mobile 375x667, Tablet 768x1024, Laptop 1366x768) with `transform: scale()` so CSS media queries fire correctly.
 
 ### Key Files
 

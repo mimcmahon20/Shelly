@@ -115,6 +115,20 @@ export function NodeConfigPanel() {
                 placeholder="Use {{input}} to reference incoming data"
               />
             </div>
+            <div>
+              <Label>Max Output Tokens</Label>
+              <Input
+                type="number"
+                min={1}
+                value={node.data.maxOutputTokens ?? ''}
+                onChange={(e) => {
+                  const v = parseInt(e.target.value);
+                  updateNode(node.id, { maxOutputTokens: isNaN(v) ? undefined : v });
+                }}
+                placeholder="Default (64k)"
+                className="w-32"
+              />
+            </div>
           </>
         )}
 

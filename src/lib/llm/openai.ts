@@ -17,6 +17,7 @@ export class OpenAIProvider implements LLMProvider {
 
       const response = await client.chat.completions.create({
         model,
+        max_tokens: request.maxTokens || undefined,
         messages: [
           { role: 'system', content: request.systemPrompt },
           { role: 'user', content: request.humanMessage },
@@ -50,6 +51,7 @@ export class OpenAIProvider implements LLMProvider {
 
     const response = await client.chat.completions.create({
       model,
+      max_tokens: request.maxTokens || undefined,
       messages: [
         { role: 'system', content: request.systemPrompt },
         { role: 'user', content: request.humanMessage },
@@ -87,6 +89,7 @@ export class OpenAIProvider implements LLMProvider {
 
     const stream = await client.chat.completions.create({
       model,
+      max_tokens: request.maxTokens || undefined,
       messages: [
         { role: 'system', content: request.systemPrompt },
         { role: 'user', content: request.humanMessage },

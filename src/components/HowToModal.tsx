@@ -258,6 +258,23 @@ export function HowToModal({ open, onOpenChange }: HowToModalProps) {
             <div className="space-y-4 text-muted-foreground">
 
               <div>
+                <h4 className="font-medium text-foreground text-sm">v0.9.1 — 2026-03-02</h4>
+                <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
+                  <li>Per-node max output tokens on agent and structured-output nodes</li>
+                  <li>Fixed hydration mismatch in collapsible sidebar</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-foreground text-sm">v0.9.0 — 2026-03-02</h4>
+                <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
+                  <li>Google AI (Gemini) provider with plain API key (ai.google.dev)</li>
+                  <li>Streaming support for OpenAI, Google AI, and Google Vertex</li>
+                  <li>Added claude-sonnet-4-6 to Anthropic model list</li>
+                </ul>
+              </div>
+
+              <div>
                 <h4 className="font-medium text-foreground text-sm">v0.8.0 — 2026-02-10</h4>
                 <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
                   <li>Collapsible left sidebar for flow management (create, delete, duplicate, import, export)</li>

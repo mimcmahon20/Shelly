@@ -160,6 +160,7 @@ async function executeNode(
               toolsEnabled: true,
               vfs: { ...vfs },
               maxToolIterations: node.data.maxToolIterations || 10,
+              maxTokens: node.data.maxOutputTokens,
             },
             streamCallbacks ? (trace) => streamCallbacks.onToolCall(node.id, trace) : undefined,
             streamCallbacks ? (text) => streamCallbacks.onDelta(node.id, text) : undefined
@@ -193,6 +194,7 @@ async function executeNode(
             model: node.data.model,
             systemPrompt,
             humanMessage,
+            maxTokens: node.data.maxOutputTokens,
           },
           streamCallbacks ? (text) => streamCallbacks.onDelta(node.id, text) : undefined
         );
@@ -225,6 +227,7 @@ async function executeNode(
             systemPrompt,
             humanMessage,
             outputSchema: node.data.outputSchema,
+            maxTokens: node.data.maxOutputTokens,
           },
           streamCallbacks ? (text) => streamCallbacks.onDelta(node.id, text) : undefined
         );

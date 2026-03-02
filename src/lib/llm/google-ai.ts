@@ -7,7 +7,9 @@ export class GoogleAIProvider implements LLMProvider {
     const genAI = new GoogleGenerativeAI(apiKey);
     const modelName = request.model || 'gemini-2.5-flash';
 
-    const generationConfig: GenerationConfig = {};
+    const generationConfig: GenerationConfig = {
+      ...(request.maxTokens ? { maxOutputTokens: request.maxTokens } : {}),
+    };
 
     if (request.outputSchema) {
       let schema: Record<string, unknown>;
@@ -46,7 +48,9 @@ export class GoogleAIProvider implements LLMProvider {
     const genAI = new GoogleGenerativeAI(apiKey);
     const modelName = request.model || 'gemini-2.5-flash';
 
-    const generationConfig: GenerationConfig = {};
+    const generationConfig: GenerationConfig = {
+      ...(request.maxTokens ? { maxOutputTokens: request.maxTokens } : {}),
+    };
 
     if (request.outputSchema) {
       let schema: Record<string, unknown>;

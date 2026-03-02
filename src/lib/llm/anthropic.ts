@@ -17,7 +17,7 @@ export class AnthropicProvider implements LLMProvider {
 
       const response = await client.messages.create({
         model: request.model || 'claude-sonnet-4-5-20250929',
-        max_tokens: 64000,
+        max_tokens: request.maxTokens || 64000,
         system: request.systemPrompt,
         tools: [
           {
@@ -79,7 +79,7 @@ export class AnthropicProvider implements LLMProvider {
 
       const stream = client.messages.stream({
         model: request.model || 'claude-sonnet-4-5-20250929',
-        max_tokens: 64000,
+        max_tokens: request.maxTokens || 64000,
         system: request.systemPrompt,
         tools: [
           {
@@ -165,7 +165,7 @@ export class AnthropicProvider implements LLMProvider {
 
       const stream = client.messages.stream({
         model: request.model || 'claude-sonnet-4-5-20250929',
-        max_tokens: 64000,
+        max_tokens: request.maxTokens || 64000,
         system: request.systemPrompt,
         messages,
         ...(useTools

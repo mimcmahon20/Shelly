@@ -28,6 +28,7 @@ export class GoogleVertexProvider implements LLMProvider {
         generationConfig: {
           responseMimeType: 'application/json',
           responseSchema: schema,
+          ...(request.maxTokens ? { maxOutputTokens: request.maxTokens } : {}),
         },
       };
 
@@ -43,6 +44,7 @@ export class GoogleVertexProvider implements LLMProvider {
     const req: GenerateContentRequest = {
       contents: [{ role: 'user', parts: [{ text: request.humanMessage }] }],
       systemInstruction: { role: 'system', parts: [{ text: request.systemPrompt }] },
+      ...(request.maxTokens ? { generationConfig: { maxOutputTokens: request.maxTokens } } : {}),
     };
 
     const response = await generativeModel.generateContent(req);
@@ -84,6 +86,7 @@ export class GoogleVertexProvider implements LLMProvider {
         generationConfig: {
           responseMimeType: 'application/json',
           responseSchema: schema,
+          ...(request.maxTokens ? { maxOutputTokens: request.maxTokens } : {}),
         },
       };
 
@@ -109,6 +112,7 @@ export class GoogleVertexProvider implements LLMProvider {
     const req: GenerateContentRequest = {
       contents: [{ role: 'user', parts: [{ text: request.humanMessage }] }],
       systemInstruction: { role: 'system', parts: [{ text: request.systemPrompt }] },
+      ...(request.maxTokens ? { generationConfig: { maxOutputTokens: request.maxTokens } } : {}),
     };
 
     const streamResult = await generativeModel.generateContentStream(req);

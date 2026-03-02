@@ -6,6 +6,17 @@ Format: Versions are grouped by release. Each entry includes the date and a summ
 
 ---
 
+## v0.9.1 — 2026-03-02
+
+### Added
+- Per-node max output tokens setting on agent and structured-output nodes
+- `maxTokens` field on `LLMRequest` honoured by all four providers (Anthropic, OpenAI, Google AI, Google Vertex)
+
+### Fixed
+- Hydration mismatch caused by reading `localStorage` inside `useState` lazy initialiser in `FlowSidebar`
+
+---
+
 ## v0.9.0 — 2026-03-02
 
 ### Added

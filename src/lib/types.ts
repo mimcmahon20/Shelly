@@ -46,6 +46,7 @@ export interface FlowNodeData {
   defaultTargetNodeId?: string;
   toolsEnabled?: boolean;
   maxToolIterations?: number;
+  maxOutputTokens?: number;
 }
 
 export interface FlowNode {
@@ -110,6 +111,7 @@ export interface LLMRequest {
   toolsEnabled?: boolean;
   vfs?: VirtualFileSystem;
   maxToolIterations?: number;
+  maxTokens?: number;
 }
 
 export interface LLMResponse {

@@ -20,7 +20,7 @@ Shelly is a **client-side visual LLM flow builder** built with Next.js 14 App Ro
 
 1. User builds a flow of connected nodes on a ReactFlow canvas
 2. `executeFlow()` in `src/lib/engine.ts` runs nodes sequentially from root nodes (no incoming edges)
-3. LLM calls go through `POST /api/llm/chat` → `AnthropicProvider` (claude-sonnet-4-20250514)
+3. LLM calls go through `POST /api/llm/chat` → provider (default: AnthropicProvider, claude-sonnet-4-5-20250929)
 4. Results are tracked per-node and stored via Zustand → IndexedDB
 
 ### Node Types (defined in `src/lib/types.ts`, executed in `src/lib/engine.ts`)
@@ -50,6 +50,8 @@ Tool-enabled agent nodes operate on a `VirtualFileSystem` (`Record<string, strin
 
 SSE events flow from `chatWithTools()`/`chatStream()` → API route → `callLLMStream()`/`callLLMWithTools()` → engine `StreamCallbacks` → `runStore.streamingNode` → `StreamingNodeCard`. Delta events carry text chunks; tool_call events carry `ToolCallTrace`. The `streamingNode` state is ephemeral (not persisted to IndexedDB).
 
+Streaming uses duck-typing: the API route checks `provider.chatStream` (optional on `LLMProvider`) rather than `instanceof AnthropicProvider`. All four providers (Anthropic, OpenAI, Google AI, Google Vertex) implement `chatStream()`. The `toolsEnabled` branch still checks `instanceof AnthropicProvider` since only Anthropic supports VFS tool loops.
+
 Token usage is split into `inputTokens`/`outputTokens` on `LLMResponse` and `NodeResult`. Cost is calculated via `src/lib/cost.ts` which maps model IDs to per-million-token pricing. The `model` field on `NodeResult` enables accurate cost computation per node.
 
 ### Testing / Eval System
@@ -74,8 +76,11 @@ The page has a slim header (logo + global actions) and a horizontal flex body. T
 - `src/lib/flowPrompt.ts` — flow-to-markdown prompt generator for export (`generateFlowPrompt()` + graph traversal helpers)
 - `src/lib/cost.ts` — model pricing map + `calculateCost()`/`formatCost()` utilities
 - `src/lib/vfs.ts` — virtual filesystem tool execution + Anthropic tool definitions
-- `src/lib/llm/provider.ts` — LLM provider interface + `callLLMWithTools()` client function + `onDelta` callbacks
+- `src/lib/llm/provider.ts` — LLM provider interface (optional `chatStream?`), `API_KEY_MAP`, `callLLMStream()`/`callLLMWithTools()` client functions
+- `src/lib/llm/registry.ts` — server-only provider instantiation; providers: `anthropic`, `openai`, `google-ai`, `google-vertex`
+- `src/lib/llm/providers.ts` — provider metadata (label + model lists) safe for client import
 - `src/lib/llm/anthropic.ts` — Anthropic SDK integration + `chatWithTools()` agentic loop
+- `src/lib/llm/google-ai.ts` — Google AI direct API (`@google/generative-ai`, plain `AIza...` key); implements `chat()` + `chatStream()`
 - `src/lib/db.ts` — IndexedDB schema (two stores: `flows`, `runs`)
 - `src/app/api/llm/chat/route.ts` — API route proxying LLM calls (auth via X-API-Key header), tool-enabled SSE branch
 - `src/components/flow/FlowCanvas.tsx` — ReactFlow wrapper with bidirectional Zustand sync (uses debounce + syncing flag to prevent loops)

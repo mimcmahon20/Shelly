@@ -33,7 +33,7 @@ export interface RoutingRule {
   targetNodeId: string;
 }
 
-export type ProviderName = 'anthropic' | 'openai' | 'google-vertex';
+export type ProviderName = 'anthropic' | 'openai' | 'google-vertex' | 'google-ai';
 
 export interface FlowNodeData {
   label?: string;

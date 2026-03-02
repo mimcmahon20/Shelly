@@ -15,6 +15,7 @@ interface ProviderKeyConfig {
 const PROVIDER_KEYS: ProviderKeyConfig[] = [
   { storageKey: 'shelly-api-key-anthropic', label: 'Anthropic API Key', placeholder: 'sk-ant-...' },
   { storageKey: 'shelly-api-key-openai', label: 'OpenAI API Key', placeholder: 'sk-...' },
+  { storageKey: 'shelly-api-key-google-ai', label: 'Google AI (Gemini) API Key', placeholder: 'AIza...' },
   {
     storageKey: 'shelly-api-key-google-vertex',
     label: 'Google Vertex (Project:Location)',

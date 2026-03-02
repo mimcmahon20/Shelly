@@ -6,6 +6,20 @@ Format: Versions are grouped by release. Each entry includes the date and a summ
 
 ---
 
+## v0.9.0 — 2026-03-02
+
+### Added
+- Google AI (Gemini) provider using direct API (`@google/generative-ai`, plain `AIza...` key from ai.google.dev)
+- Google AI API key field in Settings (separate from Google Vertex `project:location` credential)
+- `claude-sonnet-4-6` added to Anthropic model list
+- Streaming support for OpenAI, Google AI, and Google Vertex providers (previously only Anthropic streamed)
+
+### Changed
+- API route streaming check now uses duck-typing (`provider.chatStream`) instead of `instanceof AnthropicProvider`, enabling streaming for all providers that implement `chatStream()`
+- `LLMProvider` interface now has optional `chatStream?` method
+
+---
+
 ## v0.8.0 — 2026-02-10
 
 ### Added

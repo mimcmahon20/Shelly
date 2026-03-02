@@ -2,12 +2,17 @@ import type { LLMRequest, LLMResponse, ToolCallTrace, VirtualFileSystem } from '
 
 export interface LLMProvider {
   chat(request: LLMRequest, apiKey: string): Promise<LLMResponse>;
+  chatStream?(request: LLMRequest, apiKey: string): AsyncGenerator<
+    | { type: 'delta'; content: string }
+    | { type: 'done'; content: string; tokensUsed: number; inputTokens: number; outputTokens: number }
+  >;
 }
 
 const API_KEY_MAP: Record<string, string> = {
   anthropic: 'shelly-api-key-anthropic',
   openai: 'shelly-api-key-openai',
   'google-vertex': 'shelly-api-key-google-vertex',
+  'google-ai': 'shelly-api-key-google-ai',
 };
 
 export async function callLLMStream(request: LLMRequest, onDelta?: (text: string) => void): Promise<LLMResponse> {

@@ -66,4 +66,51 @@ export class OpenAIProvider implements LLMProvider {
       outputTokens,
     };
   }
+
+  async *chatStream(
+    request: LLMRequest,
+    apiKey: string
+  ): AsyncGenerator<
+    | { type: 'delta'; content: string }
+    | { type: 'done'; content: string; tokensUsed: number; inputTokens: number; outputTokens: number }
+  > {
+    // For structured output, fall back to non-streaming
+    if (request.outputSchema) {
+      const result = await this.chat(request, apiKey);
+      yield { type: 'delta', content: result.content };
+      yield { type: 'done', content: result.content, tokensUsed: result.tokensUsed, inputTokens: result.inputTokens, outputTokens: result.outputTokens };
+      return;
+    }
+
+    const client = new OpenAI({ apiKey });
+    const model = request.model || 'gpt-4o';
+
+    const stream = await client.chat.completions.create({
+      model,
+      messages: [
+        { role: 'system', content: request.systemPrompt },
+        { role: 'user', content: request.humanMessage },
+      ],
+      stream: true,
+      stream_options: { include_usage: true },
+    });
+
+    let fullContent = '';
+    let inputTokens = 0;
+    let outputTokens = 0;
+
+    for await (const chunk of stream) {
+      const text = chunk.choices[0]?.delta?.content || '';
+      if (text) {
+        fullContent += text;
+        yield { type: 'delta', content: text };
+      }
+      if (chunk.usage) {
+        inputTokens = chunk.usage.prompt_tokens || 0;
+        outputTokens = chunk.usage.completion_tokens || 0;
+      }
+    }
+
+    yield { type: 'done', content: fullContent, tokensUsed: inputTokens + outputTokens, inputTokens, outputTokens };
+  }
 }

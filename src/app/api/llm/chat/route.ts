@@ -47,12 +47,12 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    if (streamRequested && provider instanceof AnthropicProvider) {
+    if (streamRequested && provider.chatStream) {
       const encoder = new TextEncoder();
       const stream = new ReadableStream({
         async start(controller) {
           try {
-            for await (const event of provider.chatStream(body, apiKey)) {
+            for await (const event of provider.chatStream!(body, apiKey)) {
               const data = JSON.stringify(event);
               controller.enqueue(encoder.encode(`data: ${data}\n\n`));
             }

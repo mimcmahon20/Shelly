@@ -42,13 +42,15 @@ export function FlowSidebar() {
     loadFlows,
   } = useFlowStore();
 
-  const [collapsed, setCollapsed] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem(STORAGE_KEY) === 'true';
-  });
+  const [collapsed, setCollapsed] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [newFlowName, setNewFlowName] = useState('');
   const [clipboardCopied, setClipboardCopied] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === 'true') setCollapsed(true);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, String(collapsed));

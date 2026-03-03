@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import { useFlowStore } from '@/stores/flowStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,9 +7,59 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Plus, Trash2, Maximize2 } from 'lucide-react';
 import type { RoutingRule, ProviderName } from '@/lib/types';
 import { PROVIDERS } from '@/lib/llm/providers';
+
+function ExpandableTextarea({
+  label, value, onChange, placeholder, rows, mono,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  rows?: number;
+  mono?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const cls = mono ? 'font-mono text-xs' : '';
+  return (
+    <>
+      <div className="flex items-center justify-between mb-1.5">
+        <Label>{label}</Label>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="text-muted-foreground hover:text-foreground transition-colors"
+          title="Expand"
+        >
+          <Maximize2 className="h-3.5 w-3.5" />
+        </button>
+      </div>
+      <Textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={rows}
+        placeholder={placeholder}
+        className={cls}
+      />
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-2xl flex flex-col h-[70vh]">
+          <DialogHeader>
+            <DialogTitle>{label}</DialogTitle>
+          </DialogHeader>
+          <Textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            className={`flex-1 resize-none ${cls}`}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
 
 export function NodeConfigPanel() {
   const selectedNodeId = useFlowStore((s) => s.selectedNodeId);
@@ -98,21 +149,21 @@ export function NodeConfigPanel() {
               </Select>
             </div>
             <div>
-              <Label>System Prompt</Label>
-              <Textarea
+              <ExpandableTextarea
+                label="System Prompt"
                 value={node.data.systemPrompt || ''}
-                onChange={(e) => updateSystemPrompt(e.target.value)}
-                rows={4}
+                onChange={updateSystemPrompt}
                 placeholder="You are a helpful assistant..."
+                rows={4}
               />
             </div>
             <div>
-              <Label>Human Message Template</Label>
-              <Textarea
+              <ExpandableTextarea
+                label="Human Message Template"
                 value={node.data.humanMessageTemplate || ''}
-                onChange={(e) => updateHumanMessageTemplate(e.target.value)}
-                rows={3}
+                onChange={updateHumanMessageTemplate}
                 placeholder="Use {{input}} to reference incoming data"
+                rows={3}
               />
             </div>
             <div>
@@ -169,13 +220,13 @@ export function NodeConfigPanel() {
           <>
             <Separator />
             <div>
-              <Label>Output JSON Schema</Label>
-              <Textarea
+              <ExpandableTextarea
+                label="Output JSON Schema"
                 value={node.data.outputSchema || ''}
-                onChange={(e) => updateOutputSchema(e.target.value)}
-                rows={6}
+                onChange={updateOutputSchema}
                 placeholder='{"type": "object", "properties": {...}}'
-                className="font-mono text-xs"
+                rows={6}
+                mono
               />
             </div>
           </>

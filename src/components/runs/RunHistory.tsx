@@ -70,7 +70,7 @@ export function RunHistory() {
           <DrawerHeader className="pb-2">
             <DrawerTitle>Run Details</DrawerTitle>
           </DrawerHeader>
-          <div className="overflow-y-auto flex-1 px-4 pb-6">
+          <div className="overflow-y-auto flex-1 px-4 pb-6" data-vaul-no-drag>
             <RunDetail />
           </div>
         </DrawerContent>

@@ -6,6 +6,16 @@ Format: Versions are grouped by release. Each entry includes the date and a summ
 
 ---
 
+## v0.9.2 — 2026-03-02
+
+### Added
+- Expandable textarea fields for System Prompt, Human Message Template, and Output JSON Schema — click the expand icon to edit in a full-height dialog
+
+### Fixed
+- Text in the run results drawer is now selectable and copyable (`data-vaul-no-drag` prevents Vaul from capturing pointer events)
+
+---
+
 ## v0.9.1 — 2026-03-02
 
 ### Added

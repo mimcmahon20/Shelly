@@ -258,6 +258,14 @@ export function HowToModal({ open, onOpenChange }: HowToModalProps) {
             <div className="space-y-4 text-muted-foreground">
 
               <div>
+                <h4 className="font-medium text-foreground text-sm">v0.9.2 — 2026-03-02</h4>
+                <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
+                  <li>Expandable prompt fields — click the expand icon on System Prompt, Message Template, or Output Schema to edit in a full-height dialog</li>
+                  <li>Fixed text selection in the run results drawer (streamed output is now copyable)</li>
+                </ul>
+              </div>
+
+              <div>
                 <h4 className="font-medium text-foreground text-sm">v0.9.1 — 2026-03-02</h4>
                 <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
                   <li>Per-node max output tokens on agent and structured-output nodes</li>

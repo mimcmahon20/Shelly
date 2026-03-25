@@ -25,6 +25,7 @@ import {
   FileCode,
   FileText,
   Clipboard,
+  Pencil,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -38,6 +39,7 @@ export function FlowSidebar() {
     createFlow,
     deleteFlow,
     duplicateFlow,
+    renameFlow,
     getCurrentFlow,
     loadFlows,
   } = useFlowStore();
@@ -46,6 +48,8 @@ export function FlowSidebar() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [newFlowName, setNewFlowName] = useState('');
   const [clipboardCopied, setClipboardCopied] = useState(false);
+  const [renamingFlowId, setRenamingFlowId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState('');
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -55,6 +59,19 @@ export function FlowSidebar() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, String(collapsed));
   }, [collapsed]);
+
+  const startRename = (flow: { id: string; name: string }, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setRenamingFlowId(flow.id);
+    setRenameValue(flow.name);
+  };
+
+  const commitRename = async () => {
+    if (renamingFlowId && renameValue.trim()) {
+      await renameFlow(renamingFlowId, renameValue.trim());
+    }
+    setRenamingFlowId(null);
+  };
 
   const handleCreateFlow = async () => {
     if (!newFlowName.trim()) return;
@@ -156,18 +173,45 @@ export function FlowSidebar() {
             <ScrollArea className="flex-1">
               <div className="p-2 space-y-0.5">
                 {flows.map((flow) => (
-                  <button
+                  <div
                     key={flow.id}
-                    onClick={() => setCurrentFlow(flow.id)}
                     className={cn(
-                      'w-full text-left text-sm px-3 py-1.5 rounded-md truncate transition-colors',
+                      'group flex items-center gap-1 w-full text-sm px-2 py-1.5 rounded-md transition-colors',
                       flow.id === currentFlowId
                         ? 'bg-accent font-medium'
                         : 'hover:bg-accent/50 text-muted-foreground'
                     )}
                   >
-                    {flow.name}
-                  </button>
+                    {renamingFlowId === flow.id ? (
+                      <Input
+                        autoFocus
+                        value={renameValue}
+                        onChange={(e) => setRenameValue(e.target.value)}
+                        onBlur={commitRename}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') commitRename();
+                          if (e.key === 'Escape') setRenamingFlowId(null);
+                        }}
+                        className="h-6 text-sm px-1 py-0"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    ) : (
+                      <>
+                        <button
+                          className="flex-1 text-left truncate"
+                          onClick={() => setCurrentFlow(flow.id)}
+                        >
+                          {flow.name}
+                        </button>
+                        <button
+                          className="opacity-0 group-hover:opacity-100 shrink-0 p-0.5 rounded hover:bg-accent"
+                          onClick={(e) => startRename(flow, e)}
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </button>
+                      </>
+                    )}
+                  </div>
                 ))}
                 {flows.length === 0 && (
                   <p className="text-xs text-muted-foreground px-3 py-2">No flows yet</p>

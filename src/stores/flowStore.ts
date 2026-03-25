@@ -30,6 +30,7 @@ interface FlowState {
   setEdges: (edges: FlowEdge[]) => void;
   persistCurrentFlow: () => Promise<void>;
   updateFlowVfs: (vfs: VirtualFileSystem) => void;
+  renameFlow: (id: string, name: string) => Promise<void>;
 
   getCurrentFlow: () => Flow | undefined;
 }
@@ -112,6 +113,14 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     }
 
     set((s) => ({ flows: [...s.flows, duplicate], currentFlowId: newId }));
+  },
+
+  renameFlow: async (id, name) => {
+    const flow = get().flows.find((f) => f.id === id);
+    if (!flow) return;
+    const updated = { ...flow, name, updatedAt: new Date().toISOString() };
+    await saveFlow(updated);
+    set((s) => ({ flows: s.flows.map((f) => (f.id === id ? updated : f)) }));
   },
 
   setCurrentFlow: (id) => set({ currentFlowId: id, selectedNodeId: null }),

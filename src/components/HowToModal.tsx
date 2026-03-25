@@ -258,6 +258,14 @@ export function HowToModal({ open, onOpenChange }: HowToModalProps) {
             <div className="space-y-4 text-muted-foreground">
 
               <div>
+                <h4 className="font-medium text-foreground text-sm">v0.10.0 — 2026-03-24</h4>
+                <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
+                  <li>GPT-5.4, GPT-5.4 mini, and GPT-5.4 nano added to OpenAI model list with accurate pricing</li>
+                  <li>Inline flow rename — click the pencil icon on any flow in the sidebar to rename it in place</li>
+                </ul>
+              </div>
+
+              <div>
                 <h4 className="font-medium text-foreground text-sm">v0.9.2 — 2026-03-02</h4>
                 <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
                   <li>Expandable prompt fields — click the expand icon on System Prompt, Message Template, or Output Schema to edit in a full-height dialog</li>

@@ -6,6 +6,14 @@ Format: Versions are grouped by release. Each entry includes the date and a summ
 
 ---
 
+## v0.10.0 — 2026-03-24
+
+### Added
+- GPT-5.4, GPT-5.4 mini, and GPT-5.4 nano added to OpenAI model list with accurate pricing
+- Inline flow rename — click the pencil icon on any flow in the sidebar to rename it in place
+
+---
+
 ## v0.9.2 — 2026-03-02
 
 ### Added

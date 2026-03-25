@@ -12,7 +12,7 @@ export const PROVIDERS: Record<string, { label: string; models: string[] }> = {
   },
   openai: {
     label: 'OpenAI',
-    models: ['gpt-4o', 'gpt-4o-mini', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'o3', 'o3-mini', 'o4-mini'],
+    models: ['gpt-5.4', 'gpt-5.4-mini', 'gpt-5.4-nano', 'gpt-4o', 'gpt-4o-mini', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'o3', 'o3-mini', 'o4-mini'],
   },
   'google-ai': {
     label: 'Google AI (Gemini)',

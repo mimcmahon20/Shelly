@@ -8,6 +8,10 @@ const MODEL_PRICING: Record<string, [number, number]> = {
   'claude-sonnet-4-5-20250929': [3, 15],
   'claude-sonnet-4-20250514': [3, 15],
   'claude-haiku-4-5-20251001': [1, 5],
+  // OpenAI GPT-5.4
+  'gpt-5.4': [2.5, 15],
+  'gpt-5.4-mini': [0.75, 4.5],
+  'gpt-5.4-nano': [0.2, 1.25],
   // Claude 3.x
   'claude-3-5-sonnet-20241022': [3, 15],
   'claude-3-5-sonnet-20240620': [3, 15],
